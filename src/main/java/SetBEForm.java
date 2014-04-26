@@ -159,12 +159,16 @@ public class SetBEForm extends javax.swing.JFrame
     {//GEN-HEADEREND:event_BE_LatKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER)
             btnOKActionPerformed(null);
+        else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE)
+            btnCancelActionPerformed(null);
     }//GEN-LAST:event_BE_LatKeyPressed
 
     private void BE_LongKeyPressed(java.awt.event.KeyEvent evt)//GEN-FIRST:event_BE_LongKeyPressed
     {//GEN-HEADEREND:event_BE_LongKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER)
             btnOKActionPerformed(null);
+        else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE)
+            btnCancelActionPerformed(null);
     }//GEN-LAST:event_BE_LongKeyPressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -272,9 +272,10 @@ public class MFCDStatus extends Observable
     private int osbDown;
     private boolean pageSelectionMenu;
     private int pageSelectionItem = 0; // OSB number
+    private boolean bullseyeInverted = false;
     // POS PAGE
     private boolean pagePOSAltRadar = true;
-    
+    // NAV PAGE
     private int pageNAVRadius = 0;
     
     // BE in LL degrees
@@ -431,6 +432,17 @@ public class MFCDStatus extends Observable
         triggerUpdate();
     }
 
+    public boolean isBullseyeInverted()
+    {
+        return bullseyeInverted;
+    }
+
+    public void setBullseyeInverted(boolean bullseyeInverted)
+    {
+        this.bullseyeInverted = bullseyeInverted;
+        triggerUpdate();
+    }
+
     public double getBeX()
     {
         return beX;
@@ -474,19 +486,9 @@ public class MFCDStatus extends Observable
             dis = new BigDecimal(d * 0.539957).setScale(1, RoundingMode.HALF_UP) + "nm";
         else
             dis = new BigDecimal(d).setScale(1, RoundingMode.HALF_UP) + "km";
-        return ((int)getBEBearing())+"°/"+dis;
-    }
-    public String getBeBRAInvertedStr()
-    {
-        double d = getBEDistance();
-        String dis;
-        // Distance to nm
-        if (MetricSystem.IMPERIAL.equals(metricSystem))
-            dis = new BigDecimal(d * 0.539957).setScale(1, RoundingMode.HALF_UP) + "nm";
-        else
-            dis = new BigDecimal(d).setScale(1, RoundingMode.HALF_UP) + "km";
         int bear = (int) getBEBearing();
-        bear -= 180;
+        if (bullseyeInverted)
+            bear -= 180;
         if (bear < 0)
             bear +=360;
         return bear+"°/"+dis;

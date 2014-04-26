@@ -57,6 +57,8 @@ public class Main extends JFrame
                 changeBE();
             else if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_F3)
                 changeMFD();
+            else if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_F4)
+                forceReconnect();
             else if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_F12)
                 quit();
             // Pass the KeyEvent to the next KeyEventDispatcher in the chain
@@ -144,6 +146,11 @@ public class Main extends JFrame
         setMFDForm.setVisible(true);
     }
     
+    public void forceReconnect()
+    {
+        socket.forceReconnect();
+    }
+    
     private void clickIn()
     {
     }
@@ -160,6 +167,7 @@ public class Main extends JFrame
         menuToggleButtons = new javax.swing.JMenuItem();
         menuSetBE = new javax.swing.JMenuItem();
         menuMFD = new javax.swing.JMenuItem();
+        menuForceReconnect = new javax.swing.JMenuItem();
         menuQuit = new javax.swing.JMenuItem();
         drawPanel = new javax.swing.JPanel();
         OSB1 = new javax.swing.JButton();
@@ -215,6 +223,17 @@ public class Main extends JFrame
             }
         });
         popMenu.add(menuMFD);
+
+        menuForceReconnect.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, 0));
+        menuForceReconnect.setText("Force reconnect");
+        menuForceReconnect.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                menuForceReconnectActionPerformed(evt);
+            }
+        });
+        popMenu.add(menuForceReconnect);
 
         menuQuit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F12, 0));
         menuQuit.setText("Quit");
@@ -859,6 +878,11 @@ public class Main extends JFrame
         changeMFD();
     }//GEN-LAST:event_menuMFDActionPerformed
 
+    private void menuForceReconnectActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_menuForceReconnectActionPerformed
+    {//GEN-HEADEREND:event_menuForceReconnectActionPerformed
+        forceReconnect();
+    }//GEN-LAST:event_menuForceReconnectActionPerformed
+
     public static final Main main;
     static
     {
@@ -927,6 +951,7 @@ public class Main extends JFrame
     private javax.swing.JButton OSB8;
     private javax.swing.JButton OSB9;
     private javax.swing.JPanel drawPanel;
+    private javax.swing.JMenuItem menuForceReconnect;
     private javax.swing.JMenuItem menuMFD;
     private javax.swing.JMenuItem menuQuit;
     private javax.swing.JMenuItem menuSetBE;

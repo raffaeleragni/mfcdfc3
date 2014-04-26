@@ -111,7 +111,7 @@ public class MFCDCanvas extends JPanel implements Observer
         Font oldFont = g.getFont();
         g.setFont(fontSmall);
         
-        msg = status.getBeBRAInvertedStr();
+        msg = status.getBeBRAStr();
         g.setColor(Color.GREEN);
         g.drawString(msg, scale(20), scale(20+FONT_SIZE_SMALL));
         g.setFont(oldFont);
@@ -169,7 +169,11 @@ public class MFCDCanvas extends JPanel implements Observer
                 writeAtOSB(g, bounds, 10, "METRIC "+CHAR_ARROWS_VERTICAL, false);
                 break;
         }
-        writeAtOSB(g, bounds, 9, "CHANGE BE "+CHAR_ARROW_LEFT, false);
+        if (status.isBullseyeInverted())
+            writeAtOSB(g, bounds, 9, "BE INVERTED "+CHAR_ARROWS_VERTICAL, false);
+        else
+            writeAtOSB(g, bounds, 9, "BE STRAIGHT "+CHAR_ARROWS_VERTICAL, false);
+        writeAtOSB(g, bounds, 8, "CHANGE BE "+CHAR_ARROW_LEFT, false);
     }
     
     public void drawPage_ENG(Graphics g, Rectangle bounds)
@@ -195,7 +199,7 @@ public class MFCDCanvas extends JPanel implements Observer
         writeAtOSB(g, bounds, 8, "Heading: " + status.getSimData().getHeadingStr() + "  ", false);
         writeAtOSB(g, bounds, 9, "Bank: " + status.getSimData().getBankStr() + "  ", false);
         writeAtOSB(g, bounds, 10, "Pitch: " + status.getSimData().getPitchStr() + "  ", false);
-        writeAtOSB(g, bounds, 6, "BE: "+status.getBeBRAInvertedStr()+" "+CHAR_ARROW_LEFT, false);
+        writeAtOSB(g, bounds, 6, "BE: "+status.getBeBRAStr()+" "+CHAR_ARROW_LEFT, false);
     }
 
     public void drawPageSelectionMenu(Graphics g, Rectangle bounds)

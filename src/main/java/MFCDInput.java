@@ -201,6 +201,9 @@ public class MFCDInput
                     status.setMetricSystem(MFCDStatus.MetricSystem.IMPERIAL);
                 break;
             case 9:
+                status.setBullseyeInverted(!status.isBullseyeInverted());
+                break;
+            case 8:
                 Main.main.changeBE();
                 break;
         }

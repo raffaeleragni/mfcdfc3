@@ -150,4 +150,20 @@ public class MFCDSocket
             }
         }
     };
+    
+    public void forceReconnect()
+    {
+        try
+        {
+            socket.close();
+            socket.getInputStream().close();
+            dataRead.interrupt();
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(MFCDSocket.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        dataRead = null;
+        socket = null;
+    }
 }
