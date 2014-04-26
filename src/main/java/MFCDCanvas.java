@@ -1,24 +1,24 @@
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferStrategy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.function.BiConsumer;
+import javax.swing.JPanel;
 
 /**
  *
  * @author Raffaele Ragni <raffaele.ragni@gmail.com>
  */
-public class MFCDCanvas extends Canvas implements Observer
+public class MFCDCanvas extends JPanel implements Observer
 {
-    private static final int FONT_SIZE = 20;
+    private static final int FONT_SIZE_OSB = 20;
+    private static final int FONT_SIZE_SMALL = 12;
     
     private static final int OSB01_X = 80;
     private static final int OSB02_X = 160;
@@ -43,29 +43,32 @@ public class MFCDCanvas extends Canvas implements Observer
     private static final char CHAR_ARROWS_VERTICAL = '↕';
     private static final char CHAR_ARROW_RIGHT = '→';
     private static final char CHAR_ARROW_LEFT = '←';
-//    private static final char CHAR_ARROW_TOP = '↑';
-//    private static final char CHAR_ARROW_BOTTOM = '↓';
+    private static final char CHAR_ARROW_TOP = '↑';
+    private static final char CHAR_ARROW_BOTTOM = '↓';
     
     private static final String SYMBOLTEST = "SYMBOLS\n["
         +CHAR_PLUSMINUS
         +CHAR_ARROWS_HORIZONTAL
         +CHAR_ARROWS_VERTICAL
         +CHAR_ARROW_RIGHT
-        +CHAR_ARROW_LEFT+ "]";
+        +CHAR_ARROW_LEFT
+        +CHAR_ARROW_TOP 
+        +CHAR_ARROW_BOTTOM+ "]";
     
     double F = 1; // scale
     double scale(double v){return v*F;}
     int scale(int v){return (int)((double)v*F);}
     public final void setF(double f)
     {
-        font = new Font("Monospaced", Font.BOLD, (int)(FONT_SIZE * F));
+        fontOSB = new Font("Monospaced", Font.BOLD, (int)(FONT_SIZE_OSB * F));
+        fontSmall = new Font("Monospaced", Font.BOLD, (int)(FONT_SIZE_SMALL * F));
         EventQueue.invokeLater(()->{revalidate(); repaint();});
     }
 
     final MFCDStatus status;
     
-    Font font = new Font("Monospaced", Font.BOLD, FONT_SIZE);
-    long lastFrame = 0;
+    Font fontOSB = new Font("Monospaced", Font.BOLD, FONT_SIZE_OSB);
+    Font fontSmall = new Font("Monospaced", Font.BOLD, FONT_SIZE_SMALL);
     
     final Map<MFCDStatus.Page, BiConsumer<Graphics, Rectangle>> pageMaps;
     
@@ -78,23 +81,81 @@ public class MFCDCanvas extends Canvas implements Observer
         pageMaps = new HashMap<>();
         pageMaps.put(MFCDStatus.Page.TST, this::drawPage_TEST);
         pageMaps.put(MFCDStatus.Page.POS, this::drawPage_POS);
-        pageMaps.put(MFCDStatus.Page.NAV, this::drawPage_MAP);
-        pageMaps.put(MFCDStatus.Page.SMS, this::drawPage_SMS);
+        pageMaps.put(MFCDStatus.Page.NAV, this::drawPage_NAV);
         pageMaps.put(MFCDStatus.Page.STG, this::drawPage_PREF);
         pageMaps.put(MFCDStatus.Page.ENG, this::drawPage_ENG);
+        pageMaps.put(MFCDStatus.Page.WPT, this::drawPage_WPT);
     }
     
+    @Override
+    public void update(Observable o, Object arg)
+    {
+        EventQueue.invokeLater(()-> {repaint();});
+    }
+
     public void drawPage_TEST(Graphics g, Rectangle bounds)
     {
         writeAtCenter(g, bounds, SYMBOLTEST);
     }
-
-    public void drawPage_MAP(Graphics g, Rectangle bounds)
+    
+    public void drawPage_WPT(Graphics g, Rectangle bounds)
     {
+        
     }
 
-    public void drawPage_SMS(Graphics g, Rectangle bounds)
+    public void drawPage_NAV(Graphics g, Rectangle bounds)
     {
+        String msg;
+        Rectangle2D b;
+        
+        Font oldFont = g.getFont();
+        g.setFont(fontSmall);
+        
+        msg = status.getBeBRAInvertedStr();
+        g.setColor(Color.GREEN);
+        g.drawString(msg, scale(20), scale(20+FONT_SIZE_SMALL));
+        g.setFont(oldFont);
+        
+        int centerx = (int) (bounds.getX() + bounds.getWidth()/2);
+        int centery = (int) (bounds.getY() + bounds.getHeight()/2);
+            
+        int largeCircleX = (int) bounds.getX() + scale(50);
+        int largeCircleY = (int) bounds.getY() + scale(50);
+        int largeCircleW = (int) bounds.getWidth() - scale(100);
+        int largeCircleH = (int) bounds.getHeight() - scale(100);
+        g.drawArc(largeCircleX, largeCircleY, largeCircleW, largeCircleH, 0, 360);
+        
+        int smallCircleX = largeCircleX + largeCircleW/4;
+        int smallCircleY = largeCircleY + largeCircleH/4;
+        int smallCircleW = largeCircleW/2;
+        int smallCircleH = largeCircleW/2;
+        g.drawArc(smallCircleX, smallCircleY, smallCircleW, smallCircleH, 0, 360);
+        
+        double triangleSize = 5;
+        g.fillPolygon(new int[]
+        {
+            centerx,
+            (int)(centerx+scale(triangleSize)),
+            (int)(centerx-scale(triangleSize)),
+        },
+        new int[]
+        {
+            (int)(centery-scale(triangleSize)),
+            (int)(centery+scale(triangleSize)),
+            (int)(centery+scale(triangleSize)),
+        },
+        3);
+        
+        msg = status.getPageNAVRadiusStr();
+        b = g.getFontMetrics().getStringBounds(msg, g);
+        g.drawString(msg, (int)(bounds.getX() + bounds.getWidth() - b.getWidth() - scale(20)), scale(20+FONT_SIZE_SMALL));
+        
+        int mapRadiusPX = largeCircleW;
+        int mapRadius = status.getPageNAVRadius();
+        
+        g.setFont(oldFont);
+        writeAtOSB(g, bounds, 20, String.valueOf(CHAR_ARROW_TOP), false);
+        writeAtOSB(g, bounds, 19, String.valueOf(CHAR_ARROW_BOTTOM), false);
     }
 
     public void drawPage_PREF(Graphics g, Rectangle bounds)
@@ -108,6 +169,7 @@ public class MFCDCanvas extends Canvas implements Observer
                 writeAtOSB(g, bounds, 10, "METRIC "+CHAR_ARROWS_VERTICAL, false);
                 break;
         }
+        writeAtOSB(g, bounds, 9, "CHANGE BE "+CHAR_ARROW_LEFT, false);
     }
     
     public void drawPage_ENG(Graphics g, Rectangle bounds)
@@ -133,7 +195,7 @@ public class MFCDCanvas extends Canvas implements Observer
         writeAtOSB(g, bounds, 8, "Heading: " + status.getSimData().getHeadingStr() + "  ", false);
         writeAtOSB(g, bounds, 9, "Bank: " + status.getSimData().getBankStr() + "  ", false);
         writeAtOSB(g, bounds, 10, "Pitch: " + status.getSimData().getPitchStr() + "  ", false);
-        writeAtOSB(g, bounds, 6, "BE: "+status.getBeBRAStr()+" "+CHAR_ARROW_LEFT, false);
+        writeAtOSB(g, bounds, 6, "BE: "+status.getBeBRAInvertedStr()+" "+CHAR_ARROW_LEFT, false);
     }
 
     public void drawPageSelectionMenu(Graphics g, Rectangle bounds)
@@ -198,7 +260,7 @@ public class MFCDCanvas extends Canvas implements Observer
         g.setColor(Color.GREEN);
         Rectangle2D rect = g.getFontMetrics().getStringBounds(s, g);
         int x = (int) (bounds.x + bounds.width/2 - rect.getWidth()/2);
-        int y = bounds.y + bounds.height/2 + FONT_SIZE;
+        int y = bounds.y + bounds.height/2 + FONT_SIZE_OSB;
         for (int i = 0; i < lines.length; i++)
             g.drawString(s, scale(x), scale(y - i + i/2));
     }
@@ -299,7 +361,7 @@ public class MFCDCanvas extends Canvas implements Observer
             }
             else
                 g.setColor(Color.GREEN);
-            g.drawString(s, scale((int) (bounds.x + posXorY - rect.getWidth()/2)), scale(bounds.y + 10 + FONT_SIZE));
+            g.drawString(s, scale((int) (bounds.x + posXorY - rect.getWidth()/2)), scale(bounds.y + 10 + FONT_SIZE_OSB));
         }
         else if (left)
         {
@@ -334,34 +396,35 @@ public class MFCDCanvas extends Canvas implements Observer
     }
     
     @Override
-    public void paint(Graphics _g)
+    public void paintComponent(Graphics _g)
     {
         Rectangle bounds = new Rectangle();
         bounds.width = 500;
         bounds.height = 500;
-        BufferStrategy strategy = getBufferStrategy();
-        Graphics g = strategy.getDrawGraphics();
 
-        // Clear out the screen
-        g.setFont(font);
-        g.setColor(Color.BLACK);
-        g.fillRect(scale(bounds.x), scale(bounds.y), scale(bounds.width), scale(bounds.height));
-                
-        // DRAW PIECES
-        // Each layer is drawn on top of the other in that order.
-        
-        // Draw the page names at the bottom
-        drawPageNames(g, bounds);
-        
-        // Draw the current page
-        drawCurrentPage(g, bounds);
-        
-        // Draw disconnected if no connection available
-        drawConnectionStatus(g, bounds);
-        
-        g.dispose();
-        strategy.show();
-        lastFrame = System.currentTimeMillis();
+        Graphics g = _g;
+        try
+        {
+            // Clear out the screen
+            g.setFont(fontOSB);
+            g.setColor(Color.BLACK);
+            g.fillRect(scale(bounds.x), scale(bounds.y), scale(bounds.width), scale(bounds.height));
+
+            // DRAW PIECES
+            // Each layer is drawn on top of the other in that order.
+            // Draw the page names at the bottom
+            drawPageNames(g, bounds);
+
+            // Draw the current page
+            drawCurrentPage(g, bounds);
+
+            // Draw disconnected if no connection available
+            drawConnectionStatus(g, bounds);
+        }
+        finally
+        {
+            g.dispose();
+        }
     }
     
     private void drawCurrentPage(Graphics g, Rectangle bounds)
@@ -389,7 +452,7 @@ public class MFCDCanvas extends Canvas implements Observer
         int hmargin = 6;
         int selectedPage = status.getSelectedPage();
         int w = 60;
-        int h = (int) (FONT_SIZE + hmargin);
+        int h = (int) (FONT_SIZE_OSB + hmargin);
         for (int i = 0; i < pageSet.length; i++)
         {
             boolean selected = i == selectedPage;
@@ -424,25 +487,10 @@ public class MFCDCanvas extends Canvas implements Observer
         int marginbottom = 50;
         int strw = g.getFontMetrics().stringWidth(msg);
         int w = strw + 20;
-        int h = FONT_SIZE + 20;
+        int h = FONT_SIZE_OSB + 20;
         g.setColor(Color.YELLOW);
-        g.fillRect(scale(bounds.x + (bounds.width - w)/2), scale(bounds.y + bounds.height - h - marginbottom - FONT_SIZE - 8), scale(w), scale(h));
+        g.fillRect(scale(bounds.x + (bounds.width - w)/2), scale(bounds.y + bounds.height - h - marginbottom - FONT_SIZE_OSB - 8), scale(w), scale(h));
         g.setColor(Color.BLACK);
         g.drawString(msg, scale(bounds.x + (bounds.width - w)/2 + (w-strw)/2), scale(bounds.y + bounds.height - h - marginbottom));
-    }
-
-    @Override
-    public void update(Observable o, Object arg)
-    {
-        EventQueue.invokeLater(()->
-        {
-            long t = System.currentTimeMillis();
-            // Do a minimum of 5ms of wait to let refresh the screen
-            if (Math.abs(t - lastFrame) > 5)
-            {
-                revalidate();
-                repaint();
-            }
-        });
     }
 }

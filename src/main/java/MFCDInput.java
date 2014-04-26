@@ -4,6 +4,11 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
+import net.java.games.input.Component;
+import net.java.games.input.Controller;
+import net.java.games.input.ControllerEnvironment;
+import net.java.games.input.Event;
+import net.java.games.input.EventQueue;
 
 
 /**
@@ -21,59 +26,51 @@ public class MFCDInput
         pageMaps = new HashMap<>();
         pageMaps.put(MFCDStatus.Page.TST, this::delegatePageOSBClock_TEST);
         pageMaps.put(MFCDStatus.Page.POS, this::delegatePageOSBClock_POS);
-        pageMaps.put(MFCDStatus.Page.NAV, this::delegatePageOSBClock_MAP);
-        pageMaps.put(MFCDStatus.Page.SMS, this::delegatePageOSBClock_SMS);
+        pageMaps.put(MFCDStatus.Page.NAV, this::delegatePageOSBClock_NAV);
         pageMaps.put(MFCDStatus.Page.STG, this::delegatePageOSBClock_PREF);
         pageMaps.put(MFCDStatus.Page.ENG, this::delegatePageOSBClock_ENG);
+        pageMaps.put(MFCDStatus.Page.WPT, this::delegatePageOSBClock_WPT);
     }
     
-    Timer longPressTimer = null;
-    int longClicked = 0;
-    
-    private static final Object LOCK = new Object();
+    volatile Timer longPressTimer = null;
+    volatile int longClicked = 0;
     
     public void osbDown(final int num)
     {
-        synchronized(LOCK)
+        if (longPressTimer != null)
         {
-            if (longPressTimer != null)
-            {
-                longPressTimer.cancel();
-                longPressTimer = null;
-            }
-
-            status.setOsbDown(num);
-
-            longPressTimer = new Timer();
-            longPressTimer.schedule(new TimerTask()
-            {
-                @Override
-                public void run()
-                {
-                    longClicked = num;
-                    osbLongClicked(num);
-                }
-            }, 550);
+            longPressTimer.cancel();
+            longPressTimer = null;
         }
+
+        status.setOsbDown(num);
+
+        longPressTimer = new Timer();
+        longPressTimer.schedule(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                longClicked = num;
+                osbLongClicked(num);
+            }
+        }, 550);
     }
     
     public void osbUp(int num)
     {
-        synchronized(LOCK)
+        if (longPressTimer != null)
         {
-            if (longPressTimer != null)
-            {
-                longPressTimer.cancel();
-                longPressTimer = null;
-            }
-
-            status.setOsbDown(0);
-
-            if (longClicked != 0)
-                longClicked = 0;
-            else
-                osbClicked(num);
+            longPressTimer.cancel();
+            longPressTimer = null;
         }
+
+        status.setOsbDown(0);
+
+        if (longClicked != 0)
+            longClicked = 0;
+        else
+            osbClicked(num);
     }
     
     public void osbClicked(int num)
@@ -173,14 +170,24 @@ public class MFCDInput
         // DO nothing or TEST something
     }
     
-    public void delegatePageOSBClock_MAP(int osbnum)
+    
+    public void delegatePageOSBClock_WPT(int osbnum)
     {
         // DO nothing or TEST something
     }
     
-    public void delegatePageOSBClock_SMS(int osbnum)
+    public void delegatePageOSBClock_NAV(int osbnum)
     {
-        // DO nothing or TEST something
+        
+        switch (osbnum)
+        {
+            case 20: // Range increase
+                status.pageNAVRadiusIncrease();
+                break;
+            case 19: // Range decrease
+                status.pageNAVRadiusDecrease();
+                break;
+        }
     }
     
     public void delegatePageOSBClock_PREF(int osbnum)
@@ -192,6 +199,9 @@ public class MFCDInput
                     status.setMetricSystem(MFCDStatus.MetricSystem.METRIC);
                 else
                     status.setMetricSystem(MFCDStatus.MetricSystem.IMPERIAL);
+                break;
+            case 9:
+                Main.main.changeBE();
                 break;
         }
     }
@@ -213,4 +223,45 @@ public class MFCDInput
     {
         // DO nothing or TEST something
     }
+    
+    Thread joystickThread = null;
+    Controller joystick = null;
+    public void connectJoystick(Controller c)
+    {
+        if (joystickThread != null)
+            joystickThread.interrupt();
+        joystick = c;
+        joystickThread = new Thread(joystickRunnable);
+        joystickThread.start();
+    }
+    Runnable joystickRunnable = () ->
+    {
+        try
+        {
+            while(joystick != null)
+            {
+                joystick.poll();
+                EventQueue queue = joystick.getEventQueue();
+                Event event = new Event();
+                while (queue.getNextEvent(event))
+                {
+                    Component comp = event.getComponent();
+                    try
+                    {
+                        final int num = Integer.parseInt(comp.getIdentifier().getName()) + 1;
+                        if (event.getValue() != 0)
+                            osbDown(num);
+                        else
+                            osbUp(num);
+                    }
+                    catch (NumberFormatException | NullPointerException e){}
+                    Thread.sleep(1);
+                }
+            }
+        }
+        catch (InterruptedException e)
+        {
+            // Just exit the loop
+        }
+    };
 }

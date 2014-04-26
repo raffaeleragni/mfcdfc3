@@ -1,5 +1,4 @@
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -7,12 +6,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import javax.swing.JFrame;
 
 /**
  *
  * @author Raffaele Ragni <raffaele.ragni@gmail.com>
  */
-public class Main extends javax.swing.JFrame
+public class Main extends JFrame
 {
     static
     {
@@ -28,6 +28,7 @@ public class Main extends javax.swing.JFrame
     final MFCDInput input;
     final MFCDSocket socket;
     final SetBEForm setBEForm;
+    final SetUseMFD setMFDForm;
     boolean collapsed = false;
     boolean toresize = true;
     
@@ -37,6 +38,7 @@ public class Main extends javax.swing.JFrame
     {
         initComponents();
         setBEForm = new SetBEForm();
+        setMFDForm = new SetUseMFD();
         status = new MFCDStatus();
         canvas = new MFCDCanvas(status);
         input = new MFCDInput(status);
@@ -53,6 +55,8 @@ public class Main extends javax.swing.JFrame
                 toggleButtons();
             if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_F2)
                 changeBE();
+            else if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_F3)
+                changeMFD();
             else if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_F12)
                 quit();
             // Pass the KeyEvent to the next KeyEventDispatcher in the chain
@@ -131,6 +135,15 @@ public class Main extends javax.swing.JFrame
         setBEForm.setVisible(true);
     }
     
+    public void changeMFD()
+    {
+        Dimension d = getSize();
+        Point p = getLocation();
+        Dimension fd = setMFDForm.getSize();
+        setMFDForm.setLocation(p.x + d.width/2 - fd.width/2, p.y + d.height/2 - fd.height/2);
+        setMFDForm.setVisible(true);
+    }
+    
     private void clickIn()
     {
     }
@@ -146,6 +159,7 @@ public class Main extends javax.swing.JFrame
         popMenu = new javax.swing.JPopupMenu();
         menuToggleButtons = new javax.swing.JMenuItem();
         menuSetBE = new javax.swing.JMenuItem();
+        menuMFD = new javax.swing.JMenuItem();
         menuQuit = new javax.swing.JMenuItem();
         drawPanel = new javax.swing.JPanel();
         OSB1 = new javax.swing.JButton();
@@ -190,6 +204,17 @@ public class Main extends javax.swing.JFrame
             }
         });
         popMenu.add(menuSetBE);
+
+        menuMFD.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F3, 0));
+        menuMFD.setText("Use MFD");
+        menuMFD.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                menuMFDActionPerformed(evt);
+            }
+        });
+        popMenu.add(menuMFD);
 
         menuQuit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F12, 0));
         menuQuit.setText("Quit");
@@ -829,6 +854,11 @@ public class Main extends javax.swing.JFrame
         changeBE();
     }//GEN-LAST:event_menuSetBEActionPerformed
 
+    private void menuMFDActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_menuMFDActionPerformed
+    {//GEN-HEADEREND:event_menuMFDActionPerformed
+        changeMFD();
+    }//GEN-LAST:event_menuMFDActionPerformed
+
     public static final Main main;
     static
     {
@@ -872,7 +902,6 @@ public class Main extends javax.swing.JFrame
         java.awt.EventQueue.invokeLater(() ->
         {
             main.setVisible(true);
-            main.canvas.createBufferStrategy(2);
         });
     }
 
@@ -898,6 +927,7 @@ public class Main extends javax.swing.JFrame
     private javax.swing.JButton OSB8;
     private javax.swing.JButton OSB9;
     private javax.swing.JPanel drawPanel;
+    private javax.swing.JMenuItem menuMFD;
     private javax.swing.JMenuItem menuQuit;
     private javax.swing.JMenuItem menuSetBE;
     private javax.swing.JMenuItem menuToggleButtons;

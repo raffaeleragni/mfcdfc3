@@ -1,3 +1,6 @@
+
+import com.sun.glass.events.KeyEvent;
+
 /**
  *
  * @author Raffaele Ragni <raffaele.ragni@gmail.com>
@@ -38,6 +41,13 @@ public class SetBEForm extends javax.swing.JFrame
         {
             ex.printStackTrace();
         }
+        BE_Long.addKeyListener(new java.awt.event.KeyAdapter()
+        {
+            public void keyPressed(java.awt.event.KeyEvent evt)
+            {
+                BE_LongKeyPressed(evt);
+            }
+        });
 
         try
         {
@@ -46,10 +56,17 @@ public class SetBEForm extends javax.swing.JFrame
         {
             ex.printStackTrace();
         }
+        BE_Lat.addKeyListener(new java.awt.event.KeyAdapter()
+        {
+            public void keyPressed(java.awt.event.KeyEvent evt)
+            {
+                BE_LatKeyPressed(evt);
+            }
+        });
 
-        jLabel1.setText("LONG");
+        jLabel1.setText("LAT");
 
-        jLabel2.setText("LAT");
+        jLabel2.setText("LON");
 
         btnOK.setText("OK");
         btnOK.addActionListener(new java.awt.event.ActionListener()
@@ -88,7 +105,6 @@ public class SetBEForm extends javax.swing.JFrame
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(BE_Lat, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(btnOK)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnCancel))
@@ -138,6 +154,18 @@ public class SetBEForm extends javax.swing.JFrame
         }
         catch (Exception e){}
     }//GEN-LAST:event_btnOKActionPerformed
+
+    private void BE_LatKeyPressed(java.awt.event.KeyEvent evt)//GEN-FIRST:event_BE_LatKeyPressed
+    {//GEN-HEADEREND:event_BE_LatKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER)
+            btnOKActionPerformed(null);
+    }//GEN-LAST:event_BE_LatKeyPressed
+
+    private void BE_LongKeyPressed(java.awt.event.KeyEvent evt)//GEN-FIRST:event_BE_LongKeyPressed
+    {//GEN-HEADEREND:event_BE_LongKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER)
+            btnOKActionPerformed(null);
+    }//GEN-LAST:event_BE_LongKeyPressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JFormattedTextField BE_Lat;

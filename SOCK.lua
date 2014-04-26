@@ -1,42 +1,4 @@
 
---[[
-function table.val_to_str ( v )
-  if "string" == type( v ) then
-    v = string.gsub( v, "\n", "\\n" )
-    if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
-      return "'" .. v .. "'"
-    end
-    return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
-  else
-    return "table" == type( v ) and table.tostring( v ) or
-      tostring( v )
-  end
-end
-
-function table.key_to_str ( k )
-  if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
-    return k
-  else
-    return "[" .. table.val_to_str( k ) .. "]"
-  end
-end
-
-function table.tostring( tbl )
-  local result, done = {}, {}
-  for k, v in ipairs( tbl ) do
-    table.insert( result, table.val_to_str( v ) )
-    done[ k ] = true
-  end
-  for k, v in pairs( tbl ) do
-    if not done[ k ] then
-      table.insert( result,
-        table.key_to_str( k ) .. "=" .. table.val_to_str( v ) )
-    end
-  end
-  return "{" .. table.concat( result, "," ) .. "}"
-end
-]]--
-
 -- SOCKETS
 package.path = package.path.. ';.\\Scripts\\?.lua;.\\LuaSocket\\?.lua;'
 
@@ -90,9 +52,8 @@ SOCK = {
 				local selfData = LoGetSelfData()
 				self:broadcast(self.CODES.ALT..":"..baroALT..":"..radarALT)
 				if selfData then
-					self:broadcast(self.CODES.POSITION_LL..":"..selfData.LatLongAlt.Lat..":"..selfData.LatLongAlt.Long)
+					self:broadcast(self.CODES.POSITION_LL..":"..selfData.LatLongAlt.Long..":"..selfData.LatLongAlt.Lat)
 					self:broadcast(self.CODES.HBP..":"..(selfData.Heading * self.DEGRAD)..":"..(selfData.Bank * self.DEGRAD)..":"..(selfData.Pitch * self.DEGRAD))
-					--self:broadcast(self.CODES.NAME..":"..selfData.Name)
 				end
 			elseif self.loopVarsChunk == 1 then
 				-- Chunk 2: ENG page
@@ -108,13 +69,6 @@ SOCK = {
 				--local wpNum = wpData.goto_point.this_point_num
 				--local wpX = math.floor(wpData.goto_point.world_point.x)
 				--local wpY = math.floor(wpData.goto_point.world_point.z)
---[[
-				local f = io.open(lfs.writedir()..'Scripts/SOCKdump.txt', "w")
-if f then
-	f:write(table.tostring(engData))
-	f:close()
-end
-]]--
 			end
 			-- increment and reset to cycle when out of maximum
 			self.loopVarsChunk = self.loopVarsChunk + 1
@@ -128,7 +82,7 @@ end
 		for k, c in ipairs(self.clients) do
 			c:send("EXIT:0\n")
 			c:close()
-			table.remove(self.clients, c)
+			table.remove(self.clients, k)
 		end
 		self.socket:close()
 	end,
@@ -156,7 +110,7 @@ end
 					end
 				end
 				if err == "closed" then
-					table.remove(self.clients, c)
+					table.remove(self.clients, k)
 				end
 			end
 		end
@@ -205,3 +159,51 @@ do
 		SOCK:stop()
 	end
 end
+
+
+
+
+--[[
+function table.val_to_str ( v )
+  if "string" == type( v ) then
+    v = string.gsub( v, "\n", "\\n" )
+    if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
+      return "'" .. v .. "'"
+    end
+    return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
+  else
+    return "table" == type( v ) and table.tostring( v ) or
+      tostring( v )
+  end
+end
+
+function table.key_to_str ( k )
+  if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
+    return k
+  else
+    return "[" .. table.val_to_str( k ) .. "]"
+  end
+end
+
+function table.tostring( tbl )
+  local result, done = {}, {}
+  for k, v in ipairs( tbl ) do
+    table.insert( result, table.val_to_str( v ) )
+    done[ k ] = true
+  end
+  for k, v in pairs( tbl ) do
+    if not done[ k ] then
+      table.insert( result,
+        table.key_to_str( k ) .. "=" .. table.val_to_str( v ) )
+    end
+  end
+  return "{" .. table.concat( result, "," ) .. "}"
+end
+]]--
+--[[
+local f = io.open(lfs.writedir()..'Scripts/SOCKdump.txt', "w")
+if f then
+	f:write(table.tostring(engData))
+	f:close()
+end
+]]--

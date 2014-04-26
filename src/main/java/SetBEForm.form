@@ -37,7 +37,6 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="BE_Lat" alignment="1" max="32767" attributes="0"/>
                           <Group type="102" alignment="1" attributes="0">
-                              <EmptySpace max="32767" attributes="0"/>
                               <Component id="btnOK" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="btnCancel" min="-2" max="-2" attributes="0"/>
@@ -82,6 +81,9 @@
           <Format format="## ## ##" subtype="-1" type="5"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="BE_LongKeyPressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JFormattedTextField" name="BE_Lat">
       <Properties>
@@ -89,15 +91,18 @@
           <Format format="## ## ##" subtype="-1" type="5"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="BE_LatKeyPressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
-        <Property name="text" type="java.lang.String" value="LONG"/>
+        <Property name="text" type="java.lang.String" value="LAT"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel2">
       <Properties>
-        <Property name="text" type="java.lang.String" value="LAT"/>
+        <Property name="text" type="java.lang.String" value="LON"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="btnOK">

@@ -2,6 +2,8 @@
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Observable;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  *
@@ -14,11 +16,11 @@ public class MFCDStatus extends Observable
     public static final MFCDStatus.Page[] LOADPAGE_ITEMS = new MFCDStatus.Page[]
     {
         null, null, null, null, null,
-        Page.POS, Page.SMS, Page.NAV, null, null,
+        Page.POS, Page.NAV, Page.WPT, null, null,
         null, null, Page.ENG, Page.STG, Page.TST,
     };
     
-    public static enum Page {TST, POS, SMS, NAV, STG, ENG}
+    public static enum Page {TST, POS, NAV, STG, ENG, WPT}
     public static enum MetricSystem {METRIC, IMPERIAL}
     
     public class SimData
@@ -38,8 +40,7 @@ public class MFCDStatus extends Observable
                 if (!RADAR_ALT_NOVALUE.equals(this.radarAlt))
                 {
                     this.radarAlt = RADAR_ALT_NOVALUE;
-                    MFCDStatus.this.setChanged();
-                    MFCDStatus.this.notifyObservers();
+                    MFCDStatus.this.triggerUpdate();
                 }
             }
             else
@@ -63,8 +64,7 @@ public class MFCDStatus extends Observable
                 if (this.radarAlt == null || !newnum.equals(this.radarAlt))
                 {
                     this.radarAlt = newnum;
-                    MFCDStatus.this.setChanged();
-                    MFCDStatus.this.notifyObservers();
+                    MFCDStatus.this.triggerUpdate();
                 }
             }
         }
@@ -99,8 +99,7 @@ public class MFCDStatus extends Observable
             if (this.barometricAlt == null || !newnum.equals(this.barometricAlt))
             {
                 this.barometricAlt = newnum;
-                MFCDStatus.this.setChanged();
-                MFCDStatus.this.notifyObservers();
+                MFCDStatus.this.triggerUpdate();
             }
         }
         
@@ -127,8 +126,7 @@ public class MFCDStatus extends Observable
         {
             posX = x;
             posY = y;
-            MFCDStatus.this.setChanged();
-            MFCDStatus.this.notifyObservers();
+            MFCDStatus.this.triggerUpdate();
         }
         
         private int heading = 0;
@@ -169,8 +167,7 @@ public class MFCDStatus extends Observable
             this.heading = (int) h;
             this.bank = (int) b;
             this.pitch = (int) p;
-            MFCDStatus.this.setChanged();
-            MFCDStatus.this.notifyObservers();
+            MFCDStatus.this.triggerUpdate();
         }
         
         private String fuelLeft = "";
@@ -211,8 +208,7 @@ public class MFCDStatus extends Observable
                     this.fuelConsumption = s + " kph";
                     break;
             }
-            MFCDStatus.this.setChanged();
-            MFCDStatus.this.notifyObservers();
+            MFCDStatus.this.triggerUpdate();
         }
         
         private double rpmLeft = 0;
@@ -237,8 +233,7 @@ public class MFCDStatus extends Observable
         {
             this.rpmLeft = left;
             this.rpmRight = right;
-            MFCDStatus.this.setChanged();
-            MFCDStatus.this.notifyObservers();
+            MFCDStatus.this.triggerUpdate();
         }
         
         private double engineTempLeft = 0;
@@ -263,8 +258,7 @@ public class MFCDStatus extends Observable
         {
             this.engineTempLeft = left;
             this.engineTempRight = right;
-            MFCDStatus.this.setChanged();
-            MFCDStatus.this.notifyObservers();
+            MFCDStatus.this.triggerUpdate();
         }
     }
     
@@ -281,6 +275,8 @@ public class MFCDStatus extends Observable
     // POS PAGE
     private boolean pagePOSAltRadar = true;
     
+    private int pageNAVRadius = 0;
+    
     // BE in LL degrees
     // Defaults to BLUE-POTI
     private double beX = 41.678888; //Long
@@ -290,12 +286,14 @@ public class MFCDStatus extends Observable
     {
         pageSet = new Page[PAGE_SET_NUM];
         pageSet[0] = Page.NAV;
-        pageSet[1] = Page.SMS;
+        pageSet[1] = Page.WPT;
         pageSet[2] = Page.POS;
         pageSet[3] = Page.ENG;
         pageSet[4] = Page.STG;
         
         selectedPage = 0;
+        
+        pageNAVRadiusDecrease();
     }
 
     public boolean isConnected()
@@ -306,8 +304,7 @@ public class MFCDStatus extends Observable
     public void setConnected(boolean connected)
     {
         this.connected = connected;
-        setChanged();
-        notifyObservers();
+        triggerUpdate();
     }
 
     public int getSelectedPage()
@@ -318,8 +315,7 @@ public class MFCDStatus extends Observable
     public void setSelectedPage(int selectedPage)
     {
         this.selectedPage = selectedPage;
-        setChanged();
-        notifyObservers();
+        triggerUpdate();
     }
     
     public Page[] getPageSet()
@@ -334,8 +330,7 @@ public class MFCDStatus extends Observable
         if (position >= 0 && position < pageSet.length)
         {
             pageSet[position] = pageToChange;
-            setChanged();
-            notifyObservers();
+            triggerUpdate();
         }
     }
 
@@ -352,8 +347,9 @@ public class MFCDStatus extends Observable
     public void setMetricSystem(MetricSystem metricSystem)
     {
         this.metricSystem = metricSystem;
-        setChanged();
-        notifyObservers();
+        this.pageNAVRadius = 0;
+        pageNAVRadiusDecrease();
+        triggerUpdate();
     }
 
     public int getOsbDown()
@@ -364,8 +360,7 @@ public class MFCDStatus extends Observable
     public void setOsbDown(int osbDown)
     {
         this.osbDown = osbDown;
-        setChanged();
-        notifyObservers();
+        triggerUpdate();
     }
 
     public boolean isPageSelectionMenu()
@@ -376,8 +371,7 @@ public class MFCDStatus extends Observable
     public void setPageSelectionMenu(boolean pageSelectionMenu)
     {
         this.pageSelectionMenu = pageSelectionMenu;
-        setChanged();
-        notifyObservers();
+        triggerUpdate();
     }
 
     public int getPageSelectionItem()
@@ -388,8 +382,7 @@ public class MFCDStatus extends Observable
     public void setPageSelectionItem(int pageSelectionItem)
     {
         this.pageSelectionItem = pageSelectionItem;
-        setChanged();
-        notifyObservers();
+        triggerUpdate();
     }
 
     public boolean isPagePOSAltRadar()
@@ -400,8 +393,42 @@ public class MFCDStatus extends Observable
     public void setPagePOSAltRadar(boolean pagePOSAltRadar)
     {
         this.pagePOSAltRadar = pagePOSAltRadar;
-        setChanged();
-        notifyObservers();
+        triggerUpdate();
+    }
+
+    public int getPageNAVRadius()
+    {
+        return pageNAVRadius;
+    }
+
+    public String getPageNAVRadiusStr()
+    {
+        if (MetricSystem.IMPERIAL.equals(metricSystem))
+            return pageNAVRadius+"nm";
+        return pageNAVRadius+"km";
+    }
+    
+    public void pageNAVRadiusIncrease()
+    {
+        pageNAVRadius *= 2;
+        
+        if (MetricSystem.IMPERIAL.equals(metricSystem))
+            pageNAVRadius = pageNAVRadius > 160 ? 160 : pageNAVRadius;
+        else if (MetricSystem.METRIC.equals(metricSystem))
+            pageNAVRadius = pageNAVRadius > 320 ? 320 : pageNAVRadius;
+        
+        triggerUpdate();
+    }
+    
+    public void pageNAVRadiusDecrease()
+    {
+        pageNAVRadius /= 2;
+        if (MetricSystem.IMPERIAL.equals(metricSystem))
+            pageNAVRadius = pageNAVRadius < 10 ? 10 : pageNAVRadius;
+        else if (MetricSystem.METRIC.equals(metricSystem))
+            pageNAVRadius = pageNAVRadius < 20 ? 20 : pageNAVRadius;
+        
+        triggerUpdate();
     }
 
     public double getBeX()
@@ -428,16 +455,14 @@ public class MFCDStatus extends Observable
     {
         this.beX = beX;
         this.beY = beY;
-        setChanged();
-        notifyObservers();
+        triggerUpdate();
     }
 
     public void setBe(double beX1, double beX2, double beX3, double beY1, double beY2, double beY3)
     {
         this.beX = beX1+(beX2+(beX3/60))/60;
         this.beY = beY1+(beY2+(beY3/60))/60;
-        setChanged();
-        notifyObservers();
+        triggerUpdate();
     }
     
     public String getBeBRAStr()
@@ -450,6 +475,21 @@ public class MFCDStatus extends Observable
         else
             dis = new BigDecimal(d).setScale(1, RoundingMode.HALF_UP) + "km";
         return ((int)getBEBearing())+"°/"+dis;
+    }
+    public String getBeBRAInvertedStr()
+    {
+        double d = getBEDistance();
+        String dis;
+        // Distance to nm
+        if (MetricSystem.IMPERIAL.equals(metricSystem))
+            dis = new BigDecimal(d * 0.539957).setScale(1, RoundingMode.HALF_UP) + "nm";
+        else
+            dis = new BigDecimal(d).setScale(1, RoundingMode.HALF_UP) + "km";
+        int bear = (int) getBEBearing();
+        bear -= 180;
+        if (bear < 0)
+            bear +=360;
+        return bear+"°/"+dis;
     }
     
     public double getBEBearing()
@@ -537,5 +577,18 @@ public class MFCDStatus extends Observable
                 
             return s1+"°"+s2 + "\'"+s3+"\""+l;
         }
+    }
+    
+    private static final long FRAME_WAIT = 50;
+    long lastTime = 0;
+    private void triggerUpdate()
+    {
+        long t = System.currentTimeMillis();
+        if (Math.abs(t - lastTime) > FRAME_WAIT)
+        {
+            setChanged();
+            notifyObservers();
+        }
+        lastTime = t;
     }
 }
