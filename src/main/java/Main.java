@@ -6,6 +6,18 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import javax.swing.JFrame;
 
 /**
@@ -918,6 +930,7 @@ public class Main extends JFrame
             java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        checkLUA();
         main = new Main();
     }
     
@@ -955,6 +968,44 @@ public class Main extends JFrame
             if (_mfdIndex != null)
                 main.setMFDForm.selectMFDAtIndex(_mfdIndex);
             main.setVisible(true);
+        });
+    }
+    
+    private static final String EXPORTLINE = "dofile(require('lfs').writedir()..'Scripts/MFCD_FC3.lua')";
+    public static void checkLUA()
+    {
+        String home = System.getProperty("user.home");
+        Path dir1 = Paths.get(home, "Saved Games", "DCS", "Scripts");
+        Path dir2 = Paths.get(home, "Saved Games", "DCS.openbeta", "Scripts");
+        Arrays.asList(dir1, dir2).stream().forEach((p)->
+        {
+            File sockfile = new File(p.toFile(), "MFCD_FC3.lua");
+            File exportfile = new File(p.toFile(), "Export.lua");
+            boolean foundline = false;
+            byte[] buf = new byte[10240];
+            int ct = 0;
+            try
+            {
+                try (InputStream is = Main.class.getResourceAsStream("SOCK.lua");
+                    OutputStream os = new FileOutputStream(sockfile))
+                {
+                    while ((ct = is.read(buf)) > 0)
+                        os.write(buf, 0, ct);
+                }
+            
+                try (BufferedReader reader = new BufferedReader(new FileReader(exportfile)))
+                {
+                    while (!foundline && reader.ready())
+                        foundline = reader.readLine().contains(EXPORTLINE);
+                }
+                
+                if (!foundline)
+                    try (BufferedWriter w = new BufferedWriter(new FileWriter(exportfile, true)))
+                    {
+                        w.write("\n"+EXPORTLINE+"\n");
+                    }
+            }
+            catch (IOException e) {}
         });
     }
 

@@ -158,8 +158,8 @@ public class SetBEForm extends javax.swing.JFrame
         setVisible(false);
         String sLong = BE_Long.getText();
         String sLat = BE_Lat.getText();
-        String[] ssLong = sLong.replaceAll("[^0-9\\s]", "").split("\\s");
-        String[] ssLat = sLat.replaceAll("[^0-9\\s]", "").split("\\s");
+        String[] ssLong = sLong.replaceAll("[^0-9\\s\\.]", "").split("\\s");
+        String[] ssLat = sLat.replaceAll("[^0-9\\s\\.]", "").split("\\s");
         if (MFCDStatus.MetricSystem.IMPERIAL.equals(Main.main.status.getMetricSystem()))
         {
             try
