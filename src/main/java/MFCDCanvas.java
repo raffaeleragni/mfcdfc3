@@ -157,6 +157,27 @@ public class MFCDCanvas extends JPanel implements Observer
         },
         3);
         
+        // Draw the north indicator
+        {
+            double degree = status.getSimData().getHeading() -360;
+            degree += 90; // sin/cos circle starts from RIGHT
+            int starttx = (int)(centerx + Math.cos(Math.toRadians(degree)) * smallCircleW/2);
+            int starty = (int)(centery - Math.sin(Math.toRadians(degree)) * smallCircleW/2);
+            int endx = (int)(centerx + Math.cos(Math.toRadians(degree)) * (smallCircleW/2 + scale(16)));
+            int endy = (int)(centery - Math.sin(Math.toRadians(degree)) * (smallCircleW/2 + scale(16)));
+            g.drawLine(starttx, starty, endx, endy);
+            // Other points internals
+            for (int i = 0; i < 4; i++)
+            {
+                degree += 90;
+                starttx = (int)(centerx + Math.cos(Math.toRadians(degree)) * smallCircleW/2);
+                starty = (int)(centery - Math.sin(Math.toRadians(degree)) * smallCircleW/2);
+                endx = (int)(centerx + Math.cos(Math.toRadians(degree)) * (smallCircleW/2 - scale(8)));
+                endy = (int)(centery - Math.sin(Math.toRadians(degree)) * (smallCircleW/2 - scale(8)));
+                g.drawLine(starttx, starty, endx, endy);
+            }
+        }
+        
         msg = status.getPageNAVRadiusStr();
         b = g.getFontMetrics().getStringBounds(msg, g);
         g.drawString(msg, (int)(bounds.getX() + bounds.getWidth() - b.getWidth() - scale(20)), scale(20+FONT_SIZE_SMALL));
