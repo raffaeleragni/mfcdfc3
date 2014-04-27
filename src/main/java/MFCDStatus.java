@@ -2,8 +2,6 @@
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Observable;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  *
@@ -103,8 +101,8 @@ public class MFCDStatus extends Observable
             }
         }
         
-        private double posX = 0; // Long
-        private double posY = 0; // Lat
+        private double posX = 41.6; // Long
+        private double posY = 42.1; // Lat
         public double getPosX()
         {
             return posX;
@@ -483,7 +481,7 @@ public class MFCDStatus extends Observable
         String dis;
         // Distance to nm
         if (MetricSystem.IMPERIAL.equals(metricSystem))
-            dis = new BigDecimal(d * 0.539957).setScale(1, RoundingMode.HALF_UP) + "nm";
+            dis = new BigDecimal(d).setScale(1, RoundingMode.HALF_UP) + "nm";
         else
             dis = new BigDecimal(d).setScale(1, RoundingMode.HALF_UP) + "km";
         int bear = (int) getBEBearing();
@@ -521,6 +519,11 @@ public class MFCDStatus extends Observable
         return brng;
     }
     
+    public double getBEBearingDelta()
+    {
+        return getSimData().getHeading() - getBEBearing();
+    }
+    
     public double getBEDistance()
     {
         double lat1 = getSimData().getPosY();
@@ -540,23 +543,31 @@ public class MFCDStatus extends Observable
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double d = R * c;
         
+        if (MetricSystem.IMPERIAL.equals(metricSystem))
+            d = d * 0.539957;
+        
         return d;
     }
     
     public String getLLfromDeg(double _d, boolean lat)
     {
-//        if (MetricSystem.IMPERIAL.equals(metricSystem))
-//        {
-//            int deg = (int) d;
-//            String s1 = String.valueOf(deg);
-//            s1 = "00" + s1;
-//            s1 = s1.substring(s1.length() - 2, s1.length());
-//            String s2 = new BigDecimal((d * 60) % 60).setScale(3, RoundingMode.HALF_UP).toString();
-//            s2 =  "000000" + s2;
-//            s2 = s2.substring(s2.length() - 6, s2.length());
-//            return s1+" "+s2;
-//        }
-//        else
+        if (MetricSystem.IMPERIAL.equals(metricSystem))
+        {
+            int deg = (int) _d;
+            String s1 = String.valueOf(deg);
+            s1 = "00" + s1;
+            s1 = s1.substring(s1.length() - 2, s1.length());
+            String s2 = new BigDecimal((_d * 60) % 60).setScale(3, RoundingMode.HALF_UP).toString();
+            s2 =  "000000" + s2;
+            s2 = s2.substring(s2.length() - 6, s2.length());
+            char l = ' ';
+            if (lat)
+                l = _d < 0 ? 'S' : 'N';
+            else
+                l = _d < 0 ? 'W' : 'E';
+            return s1+"°"+s2+"\'"+l;
+        }
+        else
         {
             double d = _d < 0 ? - _d : _d;
             int deg = (int) d;

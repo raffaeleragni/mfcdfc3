@@ -1,5 +1,11 @@
 
 import com.sun.glass.events.KeyEvent;
+import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.text.DefaultFormatter;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.MaskFormatter;
 
 /**
  *
@@ -33,14 +39,22 @@ public class SetBEForm extends javax.swing.JFrame
 
         setTitle("Change BE");
         setAlwaysOnTop(true);
+        addWindowListener(new java.awt.event.WindowAdapter()
+        {
+            public void windowActivated(java.awt.event.WindowEvent evt)
+            {
+                formWindowActivated(evt);
+            }
+        });
 
         try
         {
-            BE_Long.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("## ## ##")));
+            BE_Long.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("## ##.###")));
         } catch (java.text.ParseException ex)
         {
             ex.printStackTrace();
         }
+        BE_Long.setToolTipText("");
         BE_Long.addKeyListener(new java.awt.event.KeyAdapter()
         {
             public void keyPressed(java.awt.event.KeyEvent evt)
@@ -51,7 +65,7 @@ public class SetBEForm extends javax.swing.JFrame
 
         try
         {
-            BE_Lat.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("## ## ##")));
+            BE_Lat.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("## ##.###")));
         } catch (java.text.ParseException ex)
         {
             ex.printStackTrace();
@@ -87,7 +101,7 @@ public class SetBEForm extends javax.swing.JFrame
         });
 
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("LL coordinates in (XX YY ZZ), space separated");
+        jLabel3.setText("LL coordinates in (XX YY.ZZZ), space separated");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -146,13 +160,26 @@ public class SetBEForm extends javax.swing.JFrame
         String sLat = BE_Lat.getText();
         String[] ssLong = sLong.replaceAll("[^0-9\\s]", "").split("\\s");
         String[] ssLat = sLat.replaceAll("[^0-9\\s]", "").split("\\s");
-        try
+        if (MFCDStatus.MetricSystem.IMPERIAL.equals(Main.main.status.getMetricSystem()))
         {
-            double beX = Double.parseDouble(ssLong[0]) + ((Double.parseDouble(ssLong[1]) + (Double.parseDouble(ssLong[2]) / 60)) / 60);
-            double beY = Double.parseDouble(ssLat[0]) + ((Double.parseDouble(ssLat[1]) + (Double.parseDouble(ssLat[2]) / 60)) / 60);
-            Main.main.status.setBe(beX, beY);
+            try
+            {
+                double beX = Double.parseDouble(ssLong[0]) + (Double.parseDouble(ssLong[1]) / 60);
+                double beY = Double.parseDouble(ssLat[0]) + (Double.parseDouble(ssLat[1]) / 60);
+                Main.main.status.setBe(beX, beY);
+            }
+            catch (Exception e){}
         }
-        catch (Exception e){}
+        else
+        {
+            try
+            {
+                double beX = Double.parseDouble(ssLong[0]) + ((Double.parseDouble(ssLong[1]) + (Double.parseDouble(ssLong[2]) / 60)) / 60);
+                double beY = Double.parseDouble(ssLat[0]) + ((Double.parseDouble(ssLat[1]) + (Double.parseDouble(ssLat[2]) / 60)) / 60);
+                Main.main.status.setBe(beX, beY);
+            }
+            catch (Exception e){}
+        }
     }//GEN-LAST:event_btnOKActionPerformed
 
     private void BE_LatKeyPressed(java.awt.event.KeyEvent evt)//GEN-FIRST:event_BE_LatKeyPressed
@@ -170,6 +197,36 @@ public class SetBEForm extends javax.swing.JFrame
         else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE)
             btnCancelActionPerformed(null);
     }//GEN-LAST:event_BE_LongKeyPressed
+
+    private void formWindowActivated(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowActivated
+    {//GEN-HEADEREND:event_formWindowActivated
+        if (MFCDStatus.MetricSystem.IMPERIAL.equals(Main.main.status.getMetricSystem()))
+        {
+            try {
+                DefaultFormatterFactory f = new DefaultFormatterFactory(new MaskFormatter("## ##.###"), new MaskFormatter("## ##.###"), new MaskFormatter("## ##.###"));
+                jLabel3.setText("LL coordinates in (XX YY.ZZZ)");
+                BE_Lat.setFormatterFactory(f);
+                BE_Long.setFormatterFactory(f);
+            }
+            catch (ParseException ex) {
+                Logger.getLogger(SetBEForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else
+        {
+            try
+            {
+                DefaultFormatterFactory f = new DefaultFormatterFactory(new MaskFormatter("## ## ##"), new MaskFormatter("## ## ##"), new MaskFormatter("## ## ##"));
+                jLabel3.setText("LL coordinates in (XX YY ZZ)");
+                BE_Lat.setFormatterFactory(f);
+                BE_Long.setFormatterFactory(f);
+            }
+            catch (ParseException ex)
+            {
+                Logger.getLogger(SetBEForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_formWindowActivated
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JFormattedTextField BE_Lat;

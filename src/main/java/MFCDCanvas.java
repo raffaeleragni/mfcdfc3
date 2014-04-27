@@ -1,8 +1,11 @@
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +21,8 @@ import javax.swing.JPanel;
 public class MFCDCanvas extends JPanel implements Observer
 {
     private static final int FONT_SIZE_OSB = 20;
-    private static final int FONT_SIZE_SMALL = 12;
+    private static final int FONT_SIZE_SMALL = 14;
+    private static final float DASH_SIZE = 5f;
     
     private static final int OSB01_X = 80;
     private static final int OSB02_X = 160;
@@ -55,21 +59,24 @@ public class MFCDCanvas extends JPanel implements Observer
         +CHAR_ARROW_TOP 
         +CHAR_ARROW_BOTTOM+ "]";
     
+    
     double F = 1; // scale
+    Font fontOSB = new Font("Monospaced", Font.BOLD, FONT_SIZE_OSB);
+    Font fontSmall = new Font("Monospaced", Font.BOLD, FONT_SIZE_SMALL);
+    BasicStroke dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, (float)(DASH_SIZE * F), new float[]{(float)(DASH_SIZE * F)}, 0);
+    
     double scale(double v){return v*F;}
     int scale(int v){return (int)((double)v*F);}
     public final void setF(double f)
     {
         fontOSB = new Font("Monospaced", Font.BOLD, (int)(FONT_SIZE_OSB * F));
         fontSmall = new Font("Monospaced", Font.BOLD, (int)(FONT_SIZE_SMALL * F));
+        dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, (float)(DASH_SIZE* F), new float[]{(float)(DASH_SIZE * F)}, 0);
         EventQueue.invokeLater(()->{revalidate(); repaint();});
+    
     }
 
     final MFCDStatus status;
-    
-    Font fontOSB = new Font("Monospaced", Font.BOLD, FONT_SIZE_OSB);
-    Font fontSmall = new Font("Monospaced", Font.BOLD, FONT_SIZE_SMALL);
-    
     final Map<MFCDStatus.Page, BiConsumer<Graphics, Rectangle>> pageMaps;
     
     public MFCDCanvas(MFCDStatus status)
@@ -112,6 +119,10 @@ public class MFCDCanvas extends JPanel implements Observer
         g.setFont(fontSmall);
         
         msg = status.getBeBRAStr();
+        if (status.isBullseyeInverted())
+            msg = CHAR_ARROW_LEFT+" "+msg;
+        else
+            msg = CHAR_ARROW_RIGHT+" "+msg;
         g.setColor(Color.GREEN);
         g.drawString(msg, scale(20), scale(20+FONT_SIZE_SMALL));
         g.setFont(oldFont);
@@ -152,6 +163,49 @@ public class MFCDCanvas extends JPanel implements Observer
         
         int mapRadiusPX = largeCircleW;
         int mapRadius = status.getPageNAVRadius();
+        
+        {
+            double deltaBearing = status.getBEBearingDelta();
+            deltaBearing += 90; // sin/cos circle starts from RIGHT
+            double distance = status.getBEDistance();
+            boolean outside = distance > mapRadius;
+            if (outside)
+            {
+                Graphics2D g2 = (Graphics2D) g;
+                Stroke oldStroke = g2.getStroke();
+                g2.setStroke(dashed);
+                g2.drawLine(
+                    (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(5)),
+                    (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(5)),
+                    (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(largeCircleW/2)),
+                    (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(largeCircleH/2)));
+                g2.setStroke(oldStroke);
+            }
+            else
+            {
+                double distancePX = distance * largeCircleW/2 / mapRadius;
+                Graphics2D g2 = (Graphics2D) g;
+                Stroke oldStroke = g2.getStroke();
+                g2.setStroke(dashed);
+                int starttx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(5));
+                int starty = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(5));
+                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(distancePX));
+                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(distancePX));
+                g2.drawLine(starttx, starty, endx, endy);
+                g2.setStroke(oldStroke);
+                
+                g.setColor(Color.GREEN);
+                g.fillArc(endx - scale(10), endy - scale(10), scale(20), scale(20), 0, 360);
+                g.setColor(Color.BLACK);
+                g.fillArc(endx - scale(8), endy - scale(8), scale(16), scale(16), 0, 360);
+                g.setColor(Color.GREEN);
+                g.fillArc(endx - scale(6), endy - scale(6), scale(12), scale(12), 0, 360);
+                g.setColor(Color.BLACK);
+                g.fillArc(endx - scale(4), endy - scale(4), scale(8), scale(8), 0, 360);
+                g.setColor(Color.GREEN);
+                g.fillArc(endx - scale(2), endy - scale(2), scale(4), scale(4), 0, 360);
+            }
+        }
         
         g.setFont(oldFont);
         writeAtOSB(g, bounds, 20, String.valueOf(CHAR_ARROW_TOP), false);
@@ -199,7 +253,8 @@ public class MFCDCanvas extends JPanel implements Observer
         writeAtOSB(g, bounds, 8, "Heading: " + status.getSimData().getHeadingStr() + "  ", false);
         writeAtOSB(g, bounds, 9, "Bank: " + status.getSimData().getBankStr() + "  ", false);
         writeAtOSB(g, bounds, 10, "Pitch: " + status.getSimData().getPitchStr() + "  ", false);
-        writeAtOSB(g, bounds, 6, "BE: "+status.getBeBRAStr()+" "+CHAR_ARROW_LEFT, false);
+        msg = status.getBeBRAStr();
+        writeAtOSB(g, bounds, 6, "BE: "+msg+" "+CHAR_ARROW_LEFT, false);
     }
 
     public void drawPageSelectionMenu(Graphics g, Rectangle bounds)
