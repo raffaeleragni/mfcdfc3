@@ -923,8 +923,37 @@ public class Main extends JFrame
     
     public static void main(String args[])
     {
+        Point position = null;
+        Integer mfdIndex = null;
+        boolean hideButtons = false;
+        for (String arg: args)
+        {
+            if (arg.equals("-noborders"))
+                hideButtons = true;
+            
+            if (arg.startsWith("-xy"))
+            {
+                String params = arg.substring(3);
+                String[] ssParams = params.split(",");
+                if (ssParams.length > 1)
+                    position = new Point(Integer.parseInt(ssParams[0]), Integer.parseInt(ssParams[1]));
+            }
+            
+            if (arg.startsWith("-useMFD"))
+                mfdIndex = Integer.parseInt(arg.substring(7)) - 1;
+        }
+        
+        final boolean _hideButtons = hideButtons;
+        final Point _position = position;
+        final Integer _mfdIndex = mfdIndex;
         java.awt.EventQueue.invokeLater(() ->
         {
+            if (_hideButtons)
+                main.toggleButtons();
+            if (_position != null)
+                main.setLocation(_position);
+            if (_mfdIndex != null)
+                main.setMFDForm.selectMFDAtIndex(_mfdIndex);
             main.setVisible(true);
         });
     }

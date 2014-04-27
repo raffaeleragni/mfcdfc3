@@ -93,6 +93,14 @@ public class SetUseMFD extends javax.swing.JFrame
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    public void selectMFDAtIndex(int index)
+    {
+        if (index < 0 || index >= combo.getItemCount())
+            return;
+        combo.setSelectedIndex(index);
+        Main.main.input.connectJoystick((Controller) combo.getSelectedItem());
+    }
+    
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnOKActionPerformed
     {//GEN-HEADEREND:event_btnOKActionPerformed
         setVisible(false);
