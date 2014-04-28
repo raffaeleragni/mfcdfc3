@@ -13,7 +13,7 @@ public class MFCDStatus extends Observable
     private static final int PAGE_SET_NUM = 5;
     public static final MFCDStatus.Page[] LOADPAGE_ITEMS = new MFCDStatus.Page[]
     {
-        null, null, null, null, null,
+        Page.TST, Page.TST, Page.TST, Page.TST, Page.TST,
         Page.POS, Page.NAV, Page.WPT, null, null,
         null, null, Page.ENG, Page.STG, Page.TST,
     };

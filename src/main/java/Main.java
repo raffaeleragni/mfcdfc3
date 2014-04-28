@@ -128,8 +128,8 @@ public class Main extends JFrame
         {
             Point prevLoc = getLocation();
             setSize(drawPanel.getWidth(), drawPanel.getHeight());
+            setLocation(prevLoc.x+drawPanel.getX(), prevLoc.y+drawPanel.getY());
             drawPanel.setLocation(0, 0);
-            setLocation(prevLoc.x+60, prevLoc.y+60);
         }
         toresize = true;
         collapsed = !collapsed;
@@ -170,6 +170,11 @@ public class Main extends JFrame
     {
     }
     
+    public void buttonReposition()
+    {
+        
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents()
@@ -182,26 +187,26 @@ public class Main extends JFrame
         menuForceReconnect = new javax.swing.JMenuItem();
         menuQuit = new javax.swing.JMenuItem();
         drawPanel = new javax.swing.JPanel();
-        OSB1 = new javax.swing.JButton();
-        OSB2 = new javax.swing.JButton();
-        OSB3 = new javax.swing.JButton();
-        OSB4 = new javax.swing.JButton();
-        OSB5 = new javax.swing.JButton();
         OSB6 = new javax.swing.JButton();
         OSB7 = new javax.swing.JButton();
         OSB8 = new javax.swing.JButton();
         OSB9 = new javax.swing.JButton();
         OSB10 = new javax.swing.JButton();
-        OSB11 = new javax.swing.JButton();
-        OSB12 = new javax.swing.JButton();
-        OSB13 = new javax.swing.JButton();
-        OSB14 = new javax.swing.JButton();
         OSB15 = new javax.swing.JButton();
-        OSB16 = new javax.swing.JButton();
-        OSB17 = new javax.swing.JButton();
-        OSB18 = new javax.swing.JButton();
-        OSB19 = new javax.swing.JButton();
+        OSB14 = new javax.swing.JButton();
+        OSB13 = new javax.swing.JButton();
+        OSB12 = new javax.swing.JButton();
+        OSB11 = new javax.swing.JButton();
+        OSB1 = new javax.swing.JButton();
+        OSB2 = new javax.swing.JButton();
+        OSB3 = new javax.swing.JButton();
+        OSB4 = new javax.swing.JButton();
+        OSB5 = new javax.swing.JButton();
         OSB20 = new javax.swing.JButton();
+        OSB19 = new javax.swing.JButton();
+        OSB18 = new javax.swing.JButton();
+        OSB17 = new javax.swing.JButton();
+        OSB16 = new javax.swing.JButton();
 
         menuToggleButtons.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
         menuToggleButtons.setText("Toggle borders");
@@ -273,12 +278,182 @@ public class Main extends JFrame
 
         drawPanel.setBackground(new java.awt.Color(0, 0, 0));
         drawPanel.setCursor(new java.awt.Cursor(java.awt.Cursor.MOVE_CURSOR));
-        drawPanel.setPreferredSize(new java.awt.Dimension(500, 500));
+        drawPanel.setPreferredSize(new java.awt.Dimension(520, 520));
         drawPanel.setRequestFocusEnabled(false);
         drawPanel.setVerifyInputWhenFocusTarget(false);
         drawPanel.setLayout(new javax.swing.BoxLayout(drawPanel, javax.swing.BoxLayout.LINE_AXIS));
         getContentPane().add(drawPanel);
-        drawPanel.setBounds(60, 60, 500, 500);
+        drawPanel.setBounds(60, 60, 520, 520);
+
+        OSB6.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB6.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB6.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB6.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB6MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB6MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB6);
+        OSB6.setBounds(590, 155, 42, 42);
+
+        OSB7.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB7.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB7.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB7.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB7MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB7MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB7);
+        OSB7.setBounds(590, 225, 42, 42);
+
+        OSB8.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB8.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB8.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB8.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB8MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB8MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB8);
+        OSB8.setBounds(590, 295, 42, 42);
+
+        OSB9.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB9.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB9.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB9.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB9MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB9MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB9);
+        OSB9.setBounds(590, 365, 42, 42);
+
+        OSB10.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB10.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB10.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB10.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB10MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB10MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB10);
+        OSB10.setBounds(590, 440, 42, 42);
+
+        OSB15.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB15.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB15.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB15.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB15MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB15MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB15);
+        OSB15.setBounds(130, 590, 42, 42);
+
+        OSB14.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB14.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB14.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB14.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB14MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB14MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB14);
+        OSB14.setBounds(210, 590, 42, 42);
+
+        OSB13.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB13.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB13.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB13.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB13MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB13MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB13);
+        OSB13.setBounds(285, 590, 42, 42);
+
+        OSB12.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB12.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB12.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB12.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB12MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB12MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB12);
+        OSB12.setBounds(365, 590, 42, 42);
+
+        OSB11.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB11.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB11.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB11.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
+                OSB11MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt)
+            {
+                OSB11MouseReleased(evt);
+            }
+        });
+        getContentPane().add(OSB11);
+        OSB11.setBounds(440, 590, 42, 42);
 
         OSB1.setMaximumSize(new java.awt.Dimension(40, 40));
         OSB1.setMinimumSize(new java.awt.Dimension(40, 40));
@@ -295,7 +470,7 @@ public class Main extends JFrame
             }
         });
         getContentPane().add(OSB1);
-        OSB1.setBounds(120, 10, 40, 40);
+        OSB1.setBounds(130, 10, 40, 40);
 
         OSB2.setMaximumSize(new java.awt.Dimension(40, 40));
         OSB2.setMinimumSize(new java.awt.Dimension(40, 40));
@@ -312,7 +487,7 @@ public class Main extends JFrame
             }
         });
         getContentPane().add(OSB2);
-        OSB2.setBounds(200, 10, 40, 40);
+        OSB2.setBounds(210, 10, 40, 40);
 
         OSB3.setMaximumSize(new java.awt.Dimension(40, 40));
         OSB3.setMinimumSize(new java.awt.Dimension(40, 40));
@@ -329,7 +504,7 @@ public class Main extends JFrame
             }
         });
         getContentPane().add(OSB3);
-        OSB3.setBounds(280, 10, 40, 40);
+        OSB3.setBounds(285, 10, 40, 40);
 
         OSB4.setMaximumSize(new java.awt.Dimension(40, 40));
         OSB4.setMinimumSize(new java.awt.Dimension(40, 40));
@@ -346,7 +521,7 @@ public class Main extends JFrame
             }
         });
         getContentPane().add(OSB4);
-        OSB4.setBounds(360, 10, 40, 40);
+        OSB4.setBounds(365, 10, 40, 40);
 
         OSB5.setMaximumSize(new java.awt.Dimension(40, 40));
         OSB5.setMinimumSize(new java.awt.Dimension(40, 40));
@@ -365,175 +540,73 @@ public class Main extends JFrame
         getContentPane().add(OSB5);
         OSB5.setBounds(440, 10, 40, 40);
 
-        OSB6.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB6.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB6.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB6.addMouseListener(new java.awt.event.MouseAdapter()
+        OSB20.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB20.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB20.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB20.addMouseListener(new java.awt.event.MouseAdapter()
         {
             public void mousePressed(java.awt.event.MouseEvent evt)
             {
-                OSB6MousePressed(evt);
+                OSB20MousePressed(evt);
             }
             public void mouseReleased(java.awt.event.MouseEvent evt)
             {
-                OSB6MouseReleased(evt);
+                OSB20MouseReleased(evt);
             }
         });
-        getContentPane().add(OSB6);
-        OSB6.setBounds(570, 120, 42, 42);
+        getContentPane().add(OSB20);
+        OSB20.setBounds(10, 155, 42, 42);
 
-        OSB7.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB7.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB7.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB7.addMouseListener(new java.awt.event.MouseAdapter()
+        OSB19.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB19.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB19.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB19.addMouseListener(new java.awt.event.MouseAdapter()
         {
             public void mousePressed(java.awt.event.MouseEvent evt)
             {
-                OSB7MousePressed(evt);
+                OSB19MousePressed(evt);
             }
             public void mouseReleased(java.awt.event.MouseEvent evt)
             {
-                OSB7MouseReleased(evt);
+                OSB19MouseReleased(evt);
             }
         });
-        getContentPane().add(OSB7);
-        OSB7.setBounds(570, 200, 42, 42);
+        getContentPane().add(OSB19);
+        OSB19.setBounds(10, 225, 42, 42);
 
-        OSB8.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB8.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB8.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB8.addMouseListener(new java.awt.event.MouseAdapter()
+        OSB18.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB18.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB18.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB18.addMouseListener(new java.awt.event.MouseAdapter()
         {
             public void mousePressed(java.awt.event.MouseEvent evt)
             {
-                OSB8MousePressed(evt);
+                OSB18MousePressed(evt);
             }
             public void mouseReleased(java.awt.event.MouseEvent evt)
             {
-                OSB8MouseReleased(evt);
+                OSB18MouseReleased(evt);
             }
         });
-        getContentPane().add(OSB8);
-        OSB8.setBounds(570, 280, 42, 42);
+        getContentPane().add(OSB18);
+        OSB18.setBounds(10, 295, 42, 42);
 
-        OSB9.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB9.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB9.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB9.addMouseListener(new java.awt.event.MouseAdapter()
+        OSB17.setMaximumSize(new java.awt.Dimension(42, 42));
+        OSB17.setMinimumSize(new java.awt.Dimension(42, 42));
+        OSB17.setPreferredSize(new java.awt.Dimension(42, 42));
+        OSB17.addMouseListener(new java.awt.event.MouseAdapter()
         {
             public void mousePressed(java.awt.event.MouseEvent evt)
             {
-                OSB9MousePressed(evt);
+                OSB17MousePressed(evt);
             }
             public void mouseReleased(java.awt.event.MouseEvent evt)
             {
-                OSB9MouseReleased(evt);
+                OSB17MouseReleased(evt);
             }
         });
-        getContentPane().add(OSB9);
-        OSB9.setBounds(570, 360, 42, 42);
-
-        OSB10.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB10.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB10.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB10.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB10MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB10MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB10);
-        OSB10.setBounds(570, 440, 42, 42);
-
-        OSB11.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB11.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB11.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB11.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB11MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB11MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB11);
-        OSB11.setBounds(440, 570, 42, 42);
-
-        OSB12.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB12.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB12.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB12.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB12MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB12MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB12);
-        OSB12.setBounds(360, 570, 42, 42);
-
-        OSB13.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB13.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB13.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB13.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB13MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB13MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB13);
-        OSB13.setBounds(280, 570, 42, 42);
-
-        OSB14.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB14.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB14.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB14.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB14MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB14MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB14);
-        OSB14.setBounds(200, 570, 42, 42);
-
-        OSB15.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB15.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB15.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB15.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB15MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB15MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB15);
-        OSB15.setBounds(120, 570, 42, 42);
+        getContentPane().add(OSB17);
+        OSB17.setBounds(10, 365, 42, 42);
 
         OSB16.setMaximumSize(new java.awt.Dimension(42, 42));
         OSB16.setMinimumSize(new java.awt.Dimension(42, 42));
@@ -552,75 +625,7 @@ public class Main extends JFrame
         getContentPane().add(OSB16);
         OSB16.setBounds(10, 440, 42, 42);
 
-        OSB17.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB17.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB17.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB17.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB17MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB17MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB17);
-        OSB17.setBounds(10, 360, 42, 42);
-
-        OSB18.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB18.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB18.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB18.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB18MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB18MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB18);
-        OSB18.setBounds(10, 280, 42, 42);
-
-        OSB19.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB19.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB19.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB19.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB19MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB19MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB19);
-        OSB19.setBounds(10, 200, 42, 42);
-
-        OSB20.setMaximumSize(new java.awt.Dimension(42, 42));
-        OSB20.setMinimumSize(new java.awt.Dimension(42, 42));
-        OSB20.setPreferredSize(new java.awt.Dimension(42, 42));
-        OSB20.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                OSB20MousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                OSB20MouseReleased(evt);
-            }
-        });
-        getContentPane().add(OSB20);
-        OSB20.setBounds(10, 120, 42, 42);
-
-        setSize(new java.awt.Dimension(620, 620));
+        setSize(new java.awt.Dimension(640, 640));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -866,8 +871,7 @@ public class Main extends JFrame
 
     private void formComponentResized(java.awt.event.ComponentEvent evt)//GEN-FIRST:event_formComponentResized
     {//GEN-HEADEREND:event_formComponentResized
-        if (!toresize)
-            return;
+        canvas.onResize();
     }//GEN-LAST:event_formComponentResized
 
     private void menuToggleButtonsActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_menuToggleButtonsActionPerformed
@@ -938,6 +942,7 @@ public class Main extends JFrame
     {
         Point position = null;
         Integer mfdIndex = null;
+        Integer size = null;
         boolean hideButtons = false;
         for (String arg: args)
         {
@@ -954,13 +959,19 @@ public class Main extends JFrame
             
             if (arg.startsWith("-useMFD"))
                 mfdIndex = Integer.parseInt(arg.substring(7)) - 1;
+            
+            if (arg.startsWith("-s"))
+                size = Integer.parseInt(arg.substring(2));
         }
         
         final boolean _hideButtons = hideButtons;
         final Point _position = position;
         final Integer _mfdIndex = mfdIndex;
+        final Integer _size = size;
         java.awt.EventQueue.invokeLater(() ->
         {
+            if (_size != null)
+                main.drawPanel.setSize(_size, _size);
             if (_hideButtons)
                 main.toggleButtons();
             if (_position != null)

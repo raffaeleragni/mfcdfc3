@@ -6,7 +6,6 @@ import java.util.TimerTask;
 import java.util.function.Consumer;
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
-import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
 
@@ -181,11 +180,11 @@ public class MFCDInput
         
         switch (osbnum)
         {
-            case 20: // Range increase
-                status.pageNAVRadiusIncrease();
-                break;
-            case 19: // Range decrease
+            case 20: // Range decrease
                 status.pageNAVRadiusDecrease();
+                break;
+            case 19: // Range increase
+                status.pageNAVRadiusIncrease();
                 break;
         }
     }
