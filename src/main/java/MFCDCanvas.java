@@ -436,7 +436,7 @@ public class MFCDCanvas extends JPanel implements Observer
 
             g.setColor(COLOR_FORE);
             for (int i = 0; i < lines.length; i++)
-                g.drawString(s, x, (int)(y - i * rect.getHeight()));
+                g.drawString(lines[i], x, (int)(y - (lines.length - i) * rect.getHeight()));
         }
 
         /**
@@ -450,16 +450,16 @@ public class MFCDCanvas extends JPanel implements Observer
         {
             Rectangle2D rect = g.getFontMetrics().getStringBounds(msg, g);
             int x = (int) (bounds.x + bounds.width/2 - rect.getWidth()/2);
-            int y = (int) (bounds.y + bounds.height/2 + rect.getHeight()/2);
+            int y = (int) (bounds.y + bounds.height/2 + bounds.height/4 + rect.getHeight());
             int w = (int) rect.getWidth();
             int h = (int) rect.getHeight();
 
             g.setColor(COLOR_WARNBOX);
             g.fillRect(
                 (int) (x - scale(OSB_TEXT_BORDER)),
-                (int) (y - scale(OSB_TEXT_BORDER)),
+                (int) (y - scale(OSB_TEXT_BORDER) - rect.getHeight()/2),
                 (int) (w + scale(OSB_TEXT_BORDER*2)),
-                (int) (h + scale(OSB_TEXT_BORDER*2))
+                (int) (h - rect.getHeight()/3 + scale(OSB_TEXT_BORDER*2))
             );
             g.setColor(COLOR_BACK);
             g.drawString(msg, x, y);

@@ -110,7 +110,8 @@ public class MFCDInput
                 delegatePageOSBClick(selectedPage, num);
                 break;
         }
-        
+        // Extra repaint - bug fix
+        Main.main.canvas.repaint();
     }
     public void osbLongClicked(int num)
     {
