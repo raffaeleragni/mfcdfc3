@@ -173,7 +173,12 @@ public class MFCDInput
     
     public void delegatePageOSBClock_WPT(int osbnum)
     {
-        // DO nothing or TEST something
+        switch (osbnum)
+        {
+            case 6: //IMPERIAL/METRIC
+                status.setBe(status.getSimData().getCurWaypointX(), status.getSimData().getCurWaypointY());
+                break;
+        }
     }
     
     public void delegatePageOSBClock_NAV(int osbnum)

@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -23,14 +24,16 @@ public class MFCDCanvas extends JPanel implements Observer
 {
     private static final int FONT_SIZE_OSB = 20;
     private static final int FONT_SIZE_SMALL = 14;
+    private static final int WP_BOX_FONTSIZE = 14;
     private static final int OSB_TEXT_MARGIN = 15;
     private static final int OSB_TEXT_BORDER = 5;
     private static final int NAV_MAP_BORDER = 50;
-    private static final int WP_BOX_FONTSIZE = 10;
     private static final float DASH_SIZE = 5f;
     private static final Color COLOR_WARNBOX = Color.YELLOW;
     private static final Color COLOR_FORE = Color.GREEN;
     private static final Color COLOR_BACK = Color.BLACK;
+    private static final Color COLOR_WP_SELECTED = Color.WHITE;
+    private static final Color COLOR_RUNWAY = Color.WHITE;
     
     private static final int OSB01_X = 90;
     private static final int OSB02_X = 170;
@@ -193,23 +196,7 @@ public class MFCDCanvas extends JPanel implements Observer
         int smallCircleW = largeCircleW/2;
         int smallCircleH = largeCircleW/2;
         g.drawArc(smallCircleX, smallCircleY, smallCircleW, smallCircleH, 0, 360);
-        
-        // AIRCRAFT POSITION (center) BY A TRIANGLE
-        double triangleSize = 5;
-        g.fillPolygon(new int[]
-        {
-            centerx,
-            (int)(centerx+scale(triangleSize)),
-            (int)(centerx-scale(triangleSize)),
-        },
-        new int[]
-        {
-            (int)(centery-scale(triangleSize)),
-            (int)(centery+scale(triangleSize)),
-            (int)(centery+scale(triangleSize)),
-        },
-        3);
-        
+                
         // Draw the north indicator and other cardinal helpers
         {
             double degree = status.getSimData().getHeading() -360;
@@ -218,7 +205,13 @@ public class MFCDCanvas extends JPanel implements Observer
             int starty = (int)(centery - Math.sin(Math.toRadians(degree)) * smallCircleW/2);
             int endx = (int)(centerx + Math.cos(Math.toRadians(degree)) * (smallCircleW/2 + scale(16)));
             int endy = (int)(centery - Math.sin(Math.toRadians(degree)) * (smallCircleW/2 + scale(16)));
-            g.drawLine(starttx, starty, endx, endy);
+            {
+                Graphics2D g2 = (Graphics2D) g;
+                Stroke oldStroke = g2.getStroke();
+                g2.setStroke(thick);
+                g.drawLine(starttx, starty, endx, endy);
+                g2.setStroke(oldStroke);
+            }
             // internals
             for (int i = 0; i < 4; i++)
             {
@@ -241,6 +234,134 @@ public class MFCDCanvas extends JPanel implements Observer
         // DATA RECARGIND THE RADIUS OF THE MAP
         int mapRadiusPX = largeCircleW/2;
         int mapRadius = status.getPageNAVRadius();
+        
+        // DRAW WAYPOINTS - DRAW ALL AND CONNECT POINTS
+        {
+            Map<Integer, double[]> wps = status.getSimData().getWaypoints();
+            int prevx = 0;
+            int prevy = 0;
+            boolean prevOutside = true;
+            boolean first = true;
+            // FIRST DRAW ALL LINES
+            for (Map.Entry<Integer, double[]> e: wps.entrySet())
+            {
+                double[] v = e.getValue();
+                double deltaBearing = status.getBearingDelta(status.getBearingToPoint(v[0], v[1]));
+                deltaBearing += 90; // sin/cos circle starts from RIGHT
+                double distance = status.getDistanceToPoint(v[0], v[1]);
+                boolean endsOutside = distance > mapRadius;
+                double distancePX = distance * mapRadiusPX / mapRadius;
+                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
+                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
+                if (first)
+                {
+                    first = false;
+                    prevx = endx;
+                    prevy = endy;
+                    prevOutside = endsOutside;
+                    continue;
+                }
+                
+                // NO NEED TO DRAW
+                if (prevOutside && endsOutside)
+                    continue;
+
+                // DRAW THE CONNECTING LINE FIRST
+                // So that the square goes over it.
+                g.setColor(COLOR_FORE);
+                // Intersect with the circle somewhere?
+                int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+                if (prevOutside)
+                {
+                    MathUtils.Point p1 = new MathUtils.Point(prevx, prevy);
+                    MathUtils.Point p2 = new MathUtils.Point(endx, endy);
+                    MathUtils.Point pc = new MathUtils.Point(centerx, centery);
+                    List<MathUtils.Point> p = MathUtils.getCircleLineIntersectionPoint(p1, p2, pc, mapRadiusPX);
+                    if (p.size() < 2)
+                        continue;
+                    x1 = (int) p.get(0).x;
+                    y1 = (int) p.get(0).y;
+                }
+                else
+                {
+                    x1 = prevx;
+                    y1 = prevy;
+                }
+                if (endsOutside)
+                {
+                    MathUtils.Point p1 = new MathUtils.Point(prevx, prevy);
+                    MathUtils.Point p2 = new MathUtils.Point(endx, endy);
+                    MathUtils.Point pc = new MathUtils.Point(centerx, centery);
+                    List<MathUtils.Point> p = MathUtils.getCircleLineIntersectionPoint(p1, p2, pc, mapRadiusPX);
+                    if (p.size() < 2)
+                        continue;
+                    x2 = (int) p.get(1).x;
+                    y2 = (int) p.get(1).y;
+                }
+                else
+                {
+                    x2 = endx;
+                    y2 = endy;
+                }
+
+                g.drawLine(x1, y1, x2, y2);
+                
+                prevx = endx;
+                prevy = endy;
+                prevOutside = endsOutside;
+            }
+            // THEN DRAW ALL SQUARES
+            wps.entrySet().stream().forEach((e) ->
+            { 
+                Integer k = e.getKey();
+                double[] v = e.getValue();
+                double deltaBearing = status.getBearingDelta(status.getBearingToPoint(v[0], v[1]));
+                deltaBearing += 90;
+                double distance = status.getDistanceToPoint(v[0], v[1]);
+                boolean outside = distance > mapRadius;
+                double distancePX = distance * mapRadiusPX / mapRadius;
+                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
+                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
+                if (!(outside))
+                {
+                    String s = String.valueOf(k);
+                    if (MFCDStatus.MetricSystem.IMPERIAL.equals(status.getMetricSystem()))
+                        s = String.valueOf(k-1);
+                    
+                    g.setFont(fontWP);
+                    Rectangle2D rect = g.getFontMetrics().getStringBounds(s, g);
+                    int maxD = (int) (rect.getWidth() > rect.getHeight() ? rect.getWidth() : rect.getHeight());
+                    if (status.getSimData().getCurWaypointNum() == k)
+                        g.setColor(COLOR_WP_SELECTED);
+                    else
+                        g.setColor(COLOR_FORE);
+                    g.fillRect(
+                        (int) (endx - maxD/2),
+                        (int) (endy - maxD/2),
+                        (int) maxD,
+                        (int) maxD
+                    );
+                    g.setColor(COLOR_BACK);
+                    g.fillRect(
+                        (int) (endx - maxD/2) + 1,
+                        (int) (endy - maxD/2) + 1,
+                        (int) maxD - 2,
+                        (int) maxD - 2
+                    );
+                    if (status.getSimData().getCurWaypointNum() == k)
+                        g.setColor(COLOR_WP_SELECTED);
+                    else
+                        g.setColor(COLOR_FORE);
+                    g.drawString(s,
+                        (int) (endx - rect.getWidth()/2),
+                        (int) (endy + rect.getHeight()/4)
+                    );
+                    g.setFont(fontOSB);
+                }
+            });
+        }
+        
+        g.setColor(COLOR_FORE);
         
         // DRAW BULLSEYE VISUAL REFERENCE
         {
@@ -291,80 +412,22 @@ public class MFCDCanvas extends JPanel implements Observer
             }
         }
         
-        // DRAW WAYPOINTS - DRAW ALL AND CONNECT POINTS
+        g.setColor(COLOR_FORE);
+        // AIRCRAFT POSITION (center) BY A TRIANGLE
+        double triangleSize = 5;
+        g.fillPolygon(new int[]
         {
-            Map<Integer, double[]> wps = status.getSimData().getWaypoints();
-            int prevx = 0;
-            int prevy = 0;
-            boolean first = true;
-            // FIRST DRAW ALL LINES
-//            for (Map.Entry<Integer, double[]> e: wps.entrySet())
-//            {
-//                Integer k = e.getKey();
-//                double[] v = e.getValue();
-//                
-//                double deltaBearing = status.getBearingDelta(status.getBearingToPoint(v[0], v[1]));
-//                deltaBearing += 90; // sin/cos circle starts from RIGHT
-//                double distance = status.getDistanceToPoint(v[0], v[1]);
-//                boolean outside = distance > mapRadius;
-//                
-//                double distancePX = distance * mapRadiusPX / mapRadius;
-//                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
-//                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
-//
-//                // DRAW THE CONNECTING LINE FIRST
-//                // So that the square goes over it.
-//                if (!first)
-//                {
-//                    g.drawLine(prevx, prevy, endx, endy);
-//                }
-//                
-//                first = false;
-//                prevx = endx;
-//                prevy = endy;
-//            }
-            // Then the squares
-            for (Map.Entry<Integer, double[]> e: wps.entrySet())
-            { 
-                Integer k = e.getKey();
-                double[] v = e.getValue();
-                
-                double deltaBearing = status.getBearingDelta(status.getBearingToPoint(v[0], v[1]));
-                deltaBearing += 90; // sin/cos circle starts from RIGHT
-                double distance = status.getDistanceToPoint(v[0], v[1]);
-                boolean outside = distance > mapRadius;
-                
-                double distancePX = distance * mapRadiusPX / mapRadius;
-                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
-                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
-
-                if (outside)
-                    continue;
-                
-                g.setFont(fontWP);
-                Rectangle2D rect = g.getFontMetrics().getStringBounds(String.valueOf(k), g);
-                g.setColor(COLOR_FORE);
-                g.fillRect(
-                    (int) (endx - rect.getWidth()),
-                    (int) (endy - rect.getHeight()),
-                    (int) rect.getWidth()*2,
-                    (int) rect.getHeight()
-                );
-                g.setColor(COLOR_BACK);
-                g.fillRect(
-                    (int) (endx - rect.getWidth())+1,
-                    (int) (endy - rect.getHeight())+1,
-                    (int) rect.getWidth()*2-2,
-                    (int) rect.getHeight()-2
-                );
-                g.setColor(COLOR_FORE);
-                g.drawString(String.valueOf(k),
-                    (int) (endx - rect.getWidth()/2 + rect.getWidth()/8),
-                    (int) (endy - rect.getHeight()/2 + rect.getHeight()/8)
-                );
-                g.setFont(fontOSB);
-            }
-        }
+            centerx,
+            (int)(centerx+scale(triangleSize)),
+            (int)(centerx-scale(triangleSize)),
+        },
+        new int[]
+        {
+            (int)(centery-scale(triangleSize)),
+            (int)(centery+scale(triangleSize)),
+            (int)(centery+scale(triangleSize)),
+        },
+        3);
         
         g.setFont(oldFont);
         Utils.writeAtOSB(g, bounds, 20, String.valueOf(CHAR_ARROW_TOP), false, status.getOsbDown());
@@ -373,9 +436,17 @@ public class MFCDCanvas extends JPanel implements Observer
     
     public void drawPage_WPT(Graphics g, Rectangle bounds)
     {
-        Utils.writeAtOSB(g, bounds, 20, "  WP: " + status.getSimData().getCurWaypointNum(), false, status.getOsbDown());
-        Utils.writeAtOSB(g, bounds, 19, "  LAT: " + status.getLLfromDeg(status.getSimData().getCurWaypointY(), true), false, status.getOsbDown());
-        Utils.writeAtOSB(g, bounds, 18, "  LON: " + status.getLLfromDeg(status.getSimData().getCurWaypointX(), false), false, status.getOsbDown());
+        String s = String.valueOf(status.getSimData().getCurWaypointNum());
+        if (MFCDStatus.MetricSystem.IMPERIAL.equals(status.getMetricSystem()))
+            s = String.valueOf(status.getSimData().getCurWaypointNum()-1);
+        if (status.getSimData().getCurWaypointNum() == -1)
+            s = "N/A";
+        Utils.writeAtOSB(g, bounds, 20, "  CUR: " + s, false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 19, "  WP: " + status.getWPBRAStr(), false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 18, "  LAT: " + status.getLLfromDeg(status.getSimData().getCurWaypointY(), true), false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 17, "  LON: " + status.getLLfromDeg(status.getSimData().getCurWaypointX(), false), false, status.getOsbDown());
+        
+        Utils.writeAtOSB(g, bounds, 6, "SET BE HERE "+CHAR_ARROW_LEFT+" ", false, status.getOsbDown());
     }
 
     public void drawPage_POS(Graphics g, Rectangle bounds)
@@ -479,6 +550,7 @@ public class MFCDCanvas extends JPanel implements Observer
     static Font fontSmall = new Font("Monospaced", Font.BOLD, FONT_SIZE_SMALL);
     static Font fontWP = new Font("Monospaced", Font.BOLD, WP_BOX_FONTSIZE);
     static BasicStroke dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, (float)(DASH_SIZE * F), new float[]{(float)(DASH_SIZE * F)}, 0);
+    static BasicStroke thick = new BasicStroke((float) (3 * F));
     // -------------------------------------------------------------------------
     public final void setF(double f)
     {
@@ -489,6 +561,7 @@ public class MFCDCanvas extends JPanel implements Observer
         float dash = (float)((double)DASH_SIZE* F);
         dash = dash < 1 ? 1 : dash;
         dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, dash, new float[]{dash}, 0);
+        thick = new BasicStroke((float) (4 * F));
         EventQueue.invokeLater(()->{revalidate(); repaint();});
     }
     public void recalculateF(int length)

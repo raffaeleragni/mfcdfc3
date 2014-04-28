@@ -529,6 +529,21 @@ public class MFCDStatus extends Observable
         return bear+"°/"+dis;
     }
     
+    public String getWPBRAStr()
+    {
+        double d = getDistanceToPoint(simData.curWaypointX, simData.curWaypointY);
+        String dis;
+        // Distance to nm
+        if (MetricSystem.IMPERIAL.equals(metricSystem))
+            dis = new BigDecimal(d).setScale(1, RoundingMode.HALF_UP) + "nm";
+        else
+            dis = new BigDecimal(d).setScale(1, RoundingMode.HALF_UP) + "km";
+        int bear = (int) getBearingToPoint(simData.curWaypointX, simData.curWaypointY);
+        if (bear < 0)
+            bear +=360;
+        return bear+"°/"+dis;
+    }
+    
     public double getBEBearing()
     {
         return getBearingToPoint(beX, beY);
