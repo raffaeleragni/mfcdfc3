@@ -16,6 +16,7 @@ SOCK = {
 		NAME = "NAME",
 		RPM = "RPM",
 		ENG_TEMP = "ET",
+		WAYPOINT = "WP",
 	},
 	-- VARS
 	loopVarsChunk = 0,
@@ -60,7 +61,7 @@ SOCK = {
 			elseif self.loopVarsChunk == 1 then
 				-- Chunk 2: ENG page
 				local engData = LoGetEngineInfo()
-				--local wpData = LoGetRoute()
+				local wpData = LoGetRoute()
 				if engData then
 					local fuelLeftKG = engData.fuel_internal + engData.fuel_external
 					local fuelConsumptionKGsec = engData.FuelConsumption.left + engData.FuelConsumption.right
@@ -68,9 +69,11 @@ SOCK = {
 					self:broadcast(self.CODES.RPM..":"..engData.RPM.left..":"..engData.RPM.right)
 					self:broadcast(self.CODES.ENG_TEMP..":"..engData.Temperature.left..":"..engData.Temperature.right)
 				end
-				--local wpNum = wpData.goto_point.this_point_num
-				--local wpX = math.floor(wpData.goto_point.world_point.x)
-				--local wpY = math.floor(wpData.goto_point.world_point.z)
+				if wpData then
+					local wpNum = wpData.goto_point.this_point_num
+					local coords = LoLoCoordinatesToGeoCoordinates(wpData.goto_point.world_point.x, wpData.goto_point.world_point.z)
+					self:broadcast(self.CODES.WAYPOINT..":"..wpNum..":"..coords.longitude..":"..coords.latitude)
+				end
 			end
 			-- increment and reset to cycle when out of maximum
 			self.loopVarsChunk = self.loopVarsChunk + 1
@@ -162,10 +165,8 @@ do
 	end
 end
 
-
-
-
 --[[
+
 function table.val_to_str ( v )
   if "string" == type( v ) then
     v = string.gsub( v, "\n", "\\n" )
@@ -201,11 +202,10 @@ function table.tostring( tbl )
   end
   return "{" .. table.concat( result, "," ) .. "}"
 end
-]]--
---[[
+
 local f = io.open(lfs.writedir()..'Scripts/SOCKdump.txt', "w")
 if f then
-	f:write(table.tostring(engData))
+	f:write(table.tostring(wpData))
 	f:close()
 end
 ]]--

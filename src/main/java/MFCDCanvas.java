@@ -26,6 +26,7 @@ public class MFCDCanvas extends JPanel implements Observer
     private static final int OSB_TEXT_MARGIN = 15;
     private static final int OSB_TEXT_BORDER = 5;
     private static final int NAV_MAP_BORDER = 50;
+    private static final int WP_BOX_FONTSIZE = 10;
     private static final float DASH_SIZE = 5f;
     private static final Color COLOR_WARNBOX = Color.YELLOW;
     private static final Color COLOR_FORE = Color.GREEN;
@@ -236,11 +237,13 @@ public class MFCDCanvas extends JPanel implements Observer
         g.drawString(msg,
             (int) (bounds.x + bounds.width - b.getWidth() - scale(OSB_TEXT_MARGIN*2)),
             (int) (bounds.y + + b.getHeight() + scale(OSB_TEXT_MARGIN)));
+
+        // DATA RECARGIND THE RADIUS OF THE MAP
+        int mapRadiusPX = largeCircleW/2;
+        int mapRadius = status.getPageNAVRadius();
         
         // DRAW BULLSEYE VISUAL REFERENCE
         {
-            int mapRadiusPX = largeCircleW/2;
-            int mapRadius = status.getPageNAVRadius();
             double deltaBearing = status.getBEBearingDelta();
             deltaBearing += 90; // sin/cos circle starts from RIGHT
             double distance = status.getBEDistance();
@@ -265,12 +268,12 @@ public class MFCDCanvas extends JPanel implements Observer
                 g2.setStroke(dashed);
                 int starttx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(5));
                 int starty = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(5));
-                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(distancePX));
-                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(distancePX));
+                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
+                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
                 g2.drawLine(starttx, starty, endx, endy);
                 g2.setStroke(oldStroke);
                 
-                for (int i = 4; i > 0; i--)
+                for (int i = 6; i > 0; i--)
                 {
                     if (i % 2 == 0)
                         g.setColor(COLOR_FORE);
@@ -288,6 +291,81 @@ public class MFCDCanvas extends JPanel implements Observer
             }
         }
         
+        // DRAW WAYPOINTS - DRAW ALL AND CONNECT POINTS
+        {
+            Map<Integer, double[]> wps = status.getSimData().getWaypoints();
+            int prevx = 0;
+            int prevy = 0;
+            boolean first = true;
+            // FIRST DRAW ALL LINES
+//            for (Map.Entry<Integer, double[]> e: wps.entrySet())
+//            {
+//                Integer k = e.getKey();
+//                double[] v = e.getValue();
+//                
+//                double deltaBearing = status.getBearingDelta(status.getBearingToPoint(v[0], v[1]));
+//                deltaBearing += 90; // sin/cos circle starts from RIGHT
+//                double distance = status.getDistanceToPoint(v[0], v[1]);
+//                boolean outside = distance > mapRadius;
+//                
+//                double distancePX = distance * mapRadiusPX / mapRadius;
+//                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
+//                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
+//
+//                // DRAW THE CONNECTING LINE FIRST
+//                // So that the square goes over it.
+//                if (!first)
+//                {
+//                    g.drawLine(prevx, prevy, endx, endy);
+//                }
+//                
+//                first = false;
+//                prevx = endx;
+//                prevy = endy;
+//            }
+            // Then the squares
+            for (Map.Entry<Integer, double[]> e: wps.entrySet())
+            { 
+                Integer k = e.getKey();
+                double[] v = e.getValue();
+                
+                double deltaBearing = status.getBearingDelta(status.getBearingToPoint(v[0], v[1]));
+                deltaBearing += 90; // sin/cos circle starts from RIGHT
+                double distance = status.getDistanceToPoint(v[0], v[1]);
+                boolean outside = distance > mapRadius;
+                
+                double distancePX = distance * mapRadiusPX / mapRadius;
+                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
+                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
+
+                if (outside)
+                    continue;
+                
+                g.setFont(fontWP);
+                Rectangle2D rect = g.getFontMetrics().getStringBounds(String.valueOf(k), g);
+                g.setColor(COLOR_FORE);
+                g.fillRect(
+                    (int) (endx - rect.getWidth()),
+                    (int) (endy - rect.getHeight()),
+                    (int) rect.getWidth()*2,
+                    (int) rect.getHeight()
+                );
+                g.setColor(COLOR_BACK);
+                g.fillRect(
+                    (int) (endx - rect.getWidth())+1,
+                    (int) (endy - rect.getHeight())+1,
+                    (int) rect.getWidth()*2-2,
+                    (int) rect.getHeight()-2
+                );
+                g.setColor(COLOR_FORE);
+                g.drawString(String.valueOf(k),
+                    (int) (endx - rect.getWidth()/2 + rect.getWidth()/8),
+                    (int) (endy - rect.getHeight()/2 + rect.getHeight()/8)
+                );
+                g.setFont(fontOSB);
+            }
+        }
+        
         g.setFont(oldFont);
         Utils.writeAtOSB(g, bounds, 20, String.valueOf(CHAR_ARROW_TOP), false, status.getOsbDown());
         Utils.writeAtOSB(g, bounds, 19, String.valueOf(CHAR_ARROW_BOTTOM), false, status.getOsbDown());
@@ -295,7 +373,9 @@ public class MFCDCanvas extends JPanel implements Observer
     
     public void drawPage_WPT(Graphics g, Rectangle bounds)
     {
-        
+        Utils.writeAtOSB(g, bounds, 20, "  WP: " + status.getSimData().getCurWaypointNum(), false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 19, "  LAT: " + status.getLLfromDeg(status.getSimData().getCurWaypointY(), true), false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 18, "  LON: " + status.getLLfromDeg(status.getSimData().getCurWaypointX(), false), false, status.getOsbDown());
     }
 
     public void drawPage_POS(Graphics g, Rectangle bounds)
@@ -397,6 +477,7 @@ public class MFCDCanvas extends JPanel implements Observer
     static double scale(double v){return v*F;}
     static Font fontOSB = new Font("Monospaced", Font.BOLD, FONT_SIZE_OSB);
     static Font fontSmall = new Font("Monospaced", Font.BOLD, FONT_SIZE_SMALL);
+    static Font fontWP = new Font("Monospaced", Font.BOLD, WP_BOX_FONTSIZE);
     static BasicStroke dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, (float)(DASH_SIZE * F), new float[]{(float)(DASH_SIZE * F)}, 0);
     // -------------------------------------------------------------------------
     public final void setF(double f)
@@ -404,6 +485,7 @@ public class MFCDCanvas extends JPanel implements Observer
         F = f;
         fontOSB = new Font("Monospaced", Font.BOLD, (int)((double)FONT_SIZE_OSB * F));
         fontSmall = new Font("Monospaced", Font.BOLD, (int)((double)FONT_SIZE_SMALL * F));
+        fontWP = new Font("Monospaced", Font.BOLD, (int)((double)WP_BOX_FONTSIZE * F));
         float dash = (float)((double)DASH_SIZE* F);
         dash = dash < 1 ? 1 : dash;
         dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, dash, new float[]{dash}, 0);
@@ -700,10 +782,10 @@ public class MFCDCanvas extends JPanel implements Observer
             Rectangle2D r = g.getFontMetrics().getStringBounds(label, g);
             g.setColor(COLOR_BACK);
             g.fillArc(
-                (int) (x - bounds.width/32),
-                (int) (y - bounds.height/32),
-                (int) (bounds.height/16),
-                (int) (bounds.height/16),
+                (int) (x - bounds.width/20),
+                (int) (y - bounds.height/20),
+                (int) (bounds.height/10),
+                (int) (bounds.height/10),
                 0,
                 360
             );
@@ -711,7 +793,7 @@ public class MFCDCanvas extends JPanel implements Observer
             g.drawString(
                 label,
                 (int) (x - r.getWidth()/2),
-                (int) (y + r.getHeight()/2)
+                (int) (y + r.getHeight()/2 - r.getHeight()/8)
             );
         }
     }

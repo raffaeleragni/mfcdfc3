@@ -27,6 +27,7 @@ public class MFCDSocket
     private static final String MSG_RPM = "RPM";
     private static final String MSG_ENGINE_TEMP = "ET";
     private static final String MSG_EXIT = "EXIT";
+    private static final String MSG_WAYPOINT = "WP";
     
     final MFCDStatus status;
     final Timer timer;
@@ -88,6 +89,10 @@ public class MFCDSocket
                                     if (pars.length > 2)
                                         status.getSimData().setEngineTemp(Double.parseDouble(pars[1]), Double.parseDouble(pars[2]));
                                     break;
+                                case MSG_WAYPOINT:
+                                    if (pars.length > 3)
+                                        status.getSimData().addWaypoint(Integer.parseInt(pars[1]), Double.parseDouble(pars[2]), Double.parseDouble(pars[3]));
+                                    break;
                                 case MSG_EXIT:
                                     socket.close();
                                     socket = null;
@@ -127,6 +132,7 @@ public class MFCDSocket
                 // Open a new socket
                 try
                 {
+                    status.reset();
                     socket = new Socket("localhost", 20000);
                     socket.setSoLinger(true, 5);
                     if (!socket.isClosed())

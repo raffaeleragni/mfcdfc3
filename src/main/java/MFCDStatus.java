@@ -1,7 +1,10 @@
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
+import java.util.TreeMap;
 
 /**
  *
@@ -187,7 +190,7 @@ public class MFCDStatus extends Observable
             {
                 case IMPERIAL:
                     iFuelLeft = (int) (left * 2.225); // to pounds (lb)
-                    iFuelConsumption = (int) (consumpion * 2.225 * 3600); // to PPH
+                    iFuelConsumption = (int) (consumpion * 2.225d * 3600d); // to PPH
                     s = "     "+String.valueOf(iFuelLeft);
                     s = s.substring(s.length() - 5, s.length()); 
                     this.fuelLeft = s + " lb";
@@ -197,7 +200,7 @@ public class MFCDStatus extends Observable
                     break;
                 case METRIC:
                     iFuelLeft = (int) left;
-                    iFuelConsumption = (int) (consumpion * 3600);
+                    iFuelConsumption = (int) (consumpion * 3600d);
                     s = "     "+String.valueOf(iFuelLeft);
                     s = s.substring(s.length() - 5, s.length()); 
                     this.fuelLeft = s + " kg";
@@ -258,6 +261,35 @@ public class MFCDStatus extends Observable
             this.engineTempRight = right;
             MFCDStatus.this.triggerUpdate();
         }
+        
+        int curWaypointNum = -1;
+        double curWaypointX = 0;
+        double curWaypointY = 0;
+        Map<Integer, double[]> waypoints = new TreeMap<>();
+        public void addWaypoint(int num, double x, double y)
+        {
+            curWaypointNum = num;
+            curWaypointX = x;
+            curWaypointY = y;
+            waypoints.put(num, new double[]{x, y});
+            MFCDStatus.this.triggerUpdate();
+        }
+        public int getCurWaypointNum()
+        {
+            return curWaypointNum;
+        }
+        public double getCurWaypointX()
+        {
+            return curWaypointX;
+        }
+        public double getCurWaypointY()
+        {
+            return curWaypointY;
+        }
+        public Map<Integer, double[]> getWaypoints()
+        {
+            return waypoints;
+        }
     }
     
     private boolean connected = false;
@@ -293,6 +325,11 @@ public class MFCDStatus extends Observable
         selectedPage = 0;
         
         pageNAVRadiusDecrease();
+    }
+    
+    public void reset()
+    {
+        getSimData().curWaypointNum = -1;
     }
 
     public boolean isConnected()
@@ -494,18 +531,66 @@ public class MFCDStatus extends Observable
     
     public double getBEBearing()
     {
-        double lat1 = getSimData().getPosY();
-        double lon1 = getSimData().getPosX();
-        double lat2 = beY;
-        double lon2 = beX;
+        return getBearingToPoint(beX, beY);
+    }
+    
+    public double getBEBearingDelta()
+    {
+        return getSimData().getHeading() - getBEBearing();
+    }
+    
+    public double getBEDistance()
+    {
+        return getDistanceToPoint(beX, beY);
+    }
+    public double getBearingDelta(double bearing)
+    {
+        return getSimData().getHeading() - bearing;
+    }
+    
+    public double getDistanceToPoint(double x, double y)
+    {
+        return getDistanceFromToPoint(getSimData().getPosX(), getSimData().getPosY(), x, y);
+    }
+    
+    public double getBearingToPoint(double _x, double _y)
+    {
+        return getBearingFromToPoint(getSimData().getPosX(), getSimData().getPosY(), _x, _y);
+    }
+    
+    public double getDistanceFromToPoint(double fx, double fy, double x, double y)
+    {
+        double lat1 = fy;
+        double lon1 = fx;
+        double lat2 = y;
+        double lon2 = x;
         
         double R = 6371; // km
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
         lat1 = Math.toRadians(lat1);
         lat2 = Math.toRadians(lat2);
-//        lon1 = Math.toRadians(lon1);
-//        lon2 = Math.toRadians(lon2);
+
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double d = R * c;
+        
+        if (MetricSystem.IMPERIAL.equals(metricSystem))
+            d = d * 0.539957;
+        
+        return d;
+    }
+    
+    public double getBearingFromToPoint(double fx, double fy, double _x, double _y)
+    {
+        double lat1 = fy;
+        double lon1 = fx;
+        double lat2 = _y;
+        double lon2 = _x;
+        
+        double dLon = Math.toRadians(lon2 - lon1);
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
         
         double y = Math.sin(dLon) * Math.cos(lat2);
         double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
@@ -517,36 +602,6 @@ public class MFCDStatus extends Observable
             brng += 360;
         
         return brng;
-    }
-    
-    public double getBEBearingDelta()
-    {
-        return getSimData().getHeading() - getBEBearing();
-    }
-    
-    public double getBEDistance()
-    {
-        double lat1 = getSimData().getPosY();
-        double lon1 = getSimData().getPosX();
-        double lat2 = beY;
-        double lon2 = beX;
-        
-        double R = 6371; // km
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-        lat1 = Math.toRadians(lat1);
-        lat2 = Math.toRadians(lat2);
-//        lon1 = Math.toRadians(lon1);
-//        lon2 = Math.toRadians(lon2);
-
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double d = R * c;
-        
-        if (MetricSystem.IMPERIAL.equals(metricSystem))
-            d = d * 0.539957;
-        
-        return d;
     }
     
     public String getLLfromDeg(double _d, boolean lat)
