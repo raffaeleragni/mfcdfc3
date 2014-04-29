@@ -39,6 +39,8 @@ public class SetBEForm extends javax.swing.JFrame
 
         setTitle("Change BE");
         setAlwaysOnTop(true);
+        setUndecorated(true);
+        setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter()
         {
             public void windowActivated(java.awt.event.WindowEvent evt)
@@ -49,7 +51,7 @@ public class SetBEForm extends javax.swing.JFrame
 
         try
         {
-            BE_Long.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("## ##.###")));
+            BE_Long.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("### ##.###")));
         } catch (java.text.ParseException ex)
         {
             ex.printStackTrace();
@@ -203,10 +205,11 @@ public class SetBEForm extends javax.swing.JFrame
         if (MFCDStatus.MetricSystem.IMPERIAL.equals(Main.main.status.getMetricSystem()))
         {
             try {
-                DefaultFormatterFactory f = new DefaultFormatterFactory(new MaskFormatter("## ##.###"), new MaskFormatter("## ##.###"), new MaskFormatter("## ##.###"));
+                DefaultFormatterFactory flat = new DefaultFormatterFactory(new MaskFormatter("## ##.###"), new MaskFormatter("## ##.###"), new MaskFormatter("## ##.###"));
+                DefaultFormatterFactory flon = new DefaultFormatterFactory(new MaskFormatter("### ##.###"), new MaskFormatter("### ##.###"), new MaskFormatter("### ##.###"));
                 jLabel3.setText("LL coordinates in (XX YY.ZZZ)");
-                BE_Lat.setFormatterFactory(f);
-                BE_Long.setFormatterFactory(f);
+                BE_Lat.setFormatterFactory(flat);
+                BE_Long.setFormatterFactory(flon);
             }
             catch (ParseException ex) {
                 Logger.getLogger(SetBEForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -216,10 +219,11 @@ public class SetBEForm extends javax.swing.JFrame
         {
             try
             {
-                DefaultFormatterFactory f = new DefaultFormatterFactory(new MaskFormatter("## ## ##"), new MaskFormatter("## ## ##"), new MaskFormatter("## ## ##"));
+                DefaultFormatterFactory flat = new DefaultFormatterFactory(new MaskFormatter("## ##.###"), new MaskFormatter("## ##.###"), new MaskFormatter("## ##.###"));
+                DefaultFormatterFactory flon = new DefaultFormatterFactory(new MaskFormatter("### ##.###"), new MaskFormatter("### ##.###"), new MaskFormatter("### ##.###"));
                 jLabel3.setText("LL coordinates in (XX YY ZZ)");
-                BE_Lat.setFormatterFactory(f);
-                BE_Long.setFormatterFactory(f);
+                BE_Lat.setFormatterFactory(flat);
+                BE_Long.setFormatterFactory(flon);
             }
             catch (ParseException ex)
             {

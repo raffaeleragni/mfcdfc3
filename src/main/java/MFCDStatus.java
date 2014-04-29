@@ -1,7 +1,8 @@
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.TreeMap;
@@ -83,7 +84,7 @@ public class MFCDStatus extends Observable
         {
             BigDecimal num;
             if (metricSystem == MetricSystem.IMPERIAL)
-                num = new BigDecimal(barometricAlt).multiply(new BigDecimal(3.281)).setScale(0, BigDecimal.ROUND_HALF_UP);
+                num = new BigDecimal(ftFromMeters(barometricAlt)).setScale(0, BigDecimal.ROUND_HALF_UP);
             else
                 num = new BigDecimal(barometricAlt).setScale(0, BigDecimal.ROUND_HALF_UP);
             String newnum = "     "+num.toString();
@@ -262,16 +263,30 @@ public class MFCDStatus extends Observable
             MFCDStatus.this.triggerUpdate();
         }
         
+        String landingName = "";
         int curWaypointNum = -1;
         double curWaypointX = 0;
         double curWaypointY = 0;
+        double curWaypointH = 0;
         Map<Integer, double[]> waypoints = new TreeMap<>();
-        public void addWaypoint(int num, double x, double y)
+        public void addWaypoint(int num, double x, double y, double h)
         {
             curWaypointNum = num;
             curWaypointX = x;
             curWaypointY = y;
-            waypoints.put(num, new double[]{x, y});
+            curWaypointH = h;
+            waypoints.put(num, new double[]{x, y, h});
+            landingName = "";
+            MFCDStatus.this.triggerUpdate();
+        }
+        public String getLandingName()
+        {
+            return landingName;
+        }
+        public void landingAt(String s)
+        {
+            landingName = s;
+            curWaypointNum = -1;
             MFCDStatus.this.triggerUpdate();
         }
         public int getCurWaypointNum()
@@ -286,6 +301,17 @@ public class MFCDStatus extends Observable
         {
             return curWaypointY;
         }
+        public double getCurWaypointH()
+        {
+            return curWaypointH;
+        }
+        public String getCurWaypointHStr()
+        {
+            if (metricSystem == MetricSystem.IMPERIAL)
+                return new BigDecimal(ftFromMeters(curWaypointH)).setScale(0, BigDecimal.ROUND_HALF_UP).toString() + "ft";
+            return new BigDecimal(curWaypointH).setScale(0, BigDecimal.ROUND_HALF_UP).toString() + "m";
+        }
+        
         public Map<Integer, double[]> getWaypoints()
         {
             return waypoints;
@@ -303,6 +329,7 @@ public class MFCDStatus extends Observable
     private boolean pageSelectionMenu;
     private int pageSelectionItem = 0; // OSB number
     private boolean bullseyeInverted = false;
+    List<double[]> markpoints = new ArrayList<>();
     // POS PAGE
     private boolean pagePOSAltRadar = true;
     // NAV PAGE
@@ -373,6 +400,36 @@ public class MFCDStatus extends Observable
     public SimData getSimData()
     {
         return simData;
+    }
+
+    public List<double[]> getMarkpoints()
+    {
+        return markpoints;
+    }
+    
+    public void addMark(double x, double y)
+    {
+        markpoints.add(new double[]{x, y});
+        triggerUpdate();
+    }
+    
+    public void addMarkFromOffset(double x, double y, double deg, double dis)
+    {
+        if (MetricSystem.IMPERIAL.equals(metricSystem))
+            dis *= 1.852d;
+        deg = 360 - deg + 90;
+//        deg += 1; // WHY???
+        // CCW E to CW N
+//        deg = 360 - deg;
+//        dis /= 5d; // WHY???
+        double dx = dis*Math.cos(Math.toRadians(deg));
+        double dy = dis*Math.sin(Math.toRadians(deg));
+        double delta_latitude = dy/111d;
+        double delta_longitude = dx/(111d*Math.cos(Math.toRadians(y)));
+        double newx = x + delta_longitude;
+        double newy = y + delta_latitude;
+        addMark(newx, newy);
+        // triggerUpdate() already called in addMark()
     }
 
     public MetricSystem getMetricSystem()
@@ -558,6 +615,9 @@ public class MFCDStatus extends Observable
     {
         return getDistanceToPoint(beX, beY);
     }
+    
+    // -------------------------------------------------------------------------
+    
     public double getBearingDelta(double bearing)
     {
         return getSimData().getHeading() - bearing;
@@ -660,6 +720,11 @@ public class MFCDStatus extends Observable
                 
             return s1+"°"+s2 + "\'"+s3+"\""+l;
         }
+    }
+    
+    public double ftFromMeters(double m)
+    {
+        return m * 3.281d;
     }
     
     private static final long FRAME_WAIT = 50;

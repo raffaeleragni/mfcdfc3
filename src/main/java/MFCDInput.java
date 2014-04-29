@@ -26,7 +26,7 @@ public class MFCDInput
         pageMaps.put(MFCDStatus.Page.TST, this::delegatePageOSBClock_TEST);
         pageMaps.put(MFCDStatus.Page.POS, this::delegatePageOSBClock_POS);
         pageMaps.put(MFCDStatus.Page.NAV, this::delegatePageOSBClock_NAV);
-        pageMaps.put(MFCDStatus.Page.STG, this::delegatePageOSBClock_PREF);
+        pageMaps.put(MFCDStatus.Page.STG, this::delegatePageOSBClock_STG);
         pageMaps.put(MFCDStatus.Page.ENG, this::delegatePageOSBClock_ENG);
         pageMaps.put(MFCDStatus.Page.WPT, this::delegatePageOSBClock_WPT);
     }
@@ -175,8 +175,15 @@ public class MFCDInput
     {
         switch (osbnum)
         {
-            case 6: //IMPERIAL/METRIC
+            case 6: // SET BE HERE
                 status.setBe(status.getSimData().getCurWaypointX(), status.getSimData().getCurWaypointY());
+                break;
+            case 7: // BE OFFSET
+                Main.main.offsetFrom(status.getBeX(), status.getBeY());
+                break;
+            case 8: // WP OFFSET
+                if (status.getSimData().getCurWaypointNum() != -1)
+                    Main.main.offsetFrom(status.getSimData().getCurWaypointX(), status.getSimData().getCurWaypointY());
                 break;
         }
     }
@@ -195,7 +202,7 @@ public class MFCDInput
         }
     }
     
-    public void delegatePageOSBClock_PREF(int osbnum)
+    public void delegatePageOSBClock_STG(int osbnum)
     {
         switch (osbnum)
         {
@@ -211,6 +218,10 @@ public class MFCDInput
             case 8:
                 Main.main.changeBE();
                 break;
+            case 20: // RESET
+                status.getSimData().getWaypoints().clear();
+                status.getMarkpoints().clear();
+                break;
         }
     }
     
@@ -223,6 +234,9 @@ public class MFCDInput
                 break;
             case 6: // BE-BRA change BE
                 Main.main.changeBE();
+                break;
+            case 7: // MK here
+                status.addMark(status.getSimData().getPosX(), status.getSimData().getPosY());
                 break;
         }
     }

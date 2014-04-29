@@ -17,6 +17,7 @@ SOCK = {
 		RPM = "RPM",
 		ENG_TEMP = "ET",
 		WAYPOINT = "WP",
+		LAND = "LAND",
 	},
 	-- VARS
 	loopVarsChunk = 0,
@@ -62,6 +63,7 @@ SOCK = {
 				-- Chunk 2: ENG page
 				local engData = LoGetEngineInfo()
 				local wpData = LoGetRoute()
+				local landing, name = self:checklanding()
 				if engData then
 					local fuelLeftKG = engData.fuel_internal + engData.fuel_external
 					local fuelConsumptionKGsec = engData.FuelConsumption.left + engData.FuelConsumption.right
@@ -69,10 +71,12 @@ SOCK = {
 					self:broadcast(self.CODES.RPM..":"..engData.RPM.left..":"..engData.RPM.right)
 					self:broadcast(self.CODES.ENG_TEMP..":"..engData.Temperature.left..":"..engData.Temperature.right)
 				end
-				if wpData then
+				if landing then
+					self:broadcast(self.CODES.LAND..":"..name)
+				elseif wpData then
 					local wpNum = wpData.goto_point.this_point_num
 					local coords = LoLoCoordinatesToGeoCoordinates(wpData.goto_point.world_point.x, wpData.goto_point.world_point.z)
-					self:broadcast(self.CODES.WAYPOINT..":"..wpNum..":"..coords.longitude..":"..coords.latitude)
+					self:broadcast(self.CODES.WAYPOINT..":"..wpNum..":"..coords.longitude..":"..coords.latitude..":"..wpData.goto_point.world_point.y)
 				end
 			end
 			-- increment and reset to cycle when out of maximum
@@ -130,6 +134,57 @@ SOCK = {
 	getreply = function(self, message)
 		-- TODO
 		return nil
+	end,
+	checklanding = function(self)
+		local navInfo = LoGetNavigationInfo()
+		local navRoute = LoGetRoute()
+		local x = math.floor(navRoute.goto_point.world_point.x)
+		if navInfo.SystemMode.submode == "LANDING" or navInfo.SystemMode.submode == "ARRIVAL" then
+			if (x == -18893) or (x == 8070) or (x == 1329) or (x == -12152) then
+				return true, "Anapa"
+			elseif (x == -20469) or (x == 7301) or (x == 359) or (x == -13527) then
+				return true, "Krymsk"
+			elseif (x == -54298) or (x == -47609) then
+				return true, "Novorossiysk"
+			elseif (x == -64187) or (x == -57293) then
+				return true, "Gelendzhik"
+			elseif (x == -4567) or (x == 19982) or (x == 13845) or (x == 1570) then
+				return true, "Krasnodar-P"
+			elseif (x == 10744) or (x == 12626) or (x == 12155) or (x == 11214) then
+				return true, "Krasnodar-C"
+			elseif (x == -212461) or (x == -180974) or (x == -188846) or (x == -204590) then
+				return true, "Gudauta"
+			elseif (x == -172929) or (x == -168705) then
+				return true, "Sochi"
+			elseif (x == -212547) or (x == -228602) or (x == -216561) or (x == -224588) then
+				return true, "Sukhumi"
+			elseif (x == -280306) or (x == -283255) or (x == -281043) or (x == -282518) then
+				return true, "Senaki"
+			elseif (x == -289850) or (x == -279928) or (x == -282409) or (x == -287370) then
+				return true, "Kutaisi"
+			elseif (x == -43567) or (x == -58952) or (x == -47414) or (x == -55106) then
+				return true, "Mineralnye-V"
+			elseif (x == -40432) or (x == -12454) or (x == -19449) or (x == -33437) then
+				return true, "Maykop"
+			elseif (x == -114735) or (x == -119831) then
+				return true, "Nalchik"
+			elseif (x == -85786) or (x == -81251) or (x == -82385) or (x == -84652) then
+				return true, "Mozdok"
+			elseif (x == -147492) or (x == -149690) or (x == -148042) or (x == -149141) then
+				return true, "Beslan"
+			elseif (x == -345359) or (x == -350596) then
+				return true, "Batumi"
+			elseif (x == -324114) or (x == -311802) or (x == -314880) or (x == -321036) then
+				return true, "Kobuleti"
+			elseif (x == -306227) or (x == -331898) or (x == -312645) or (x == -323887) then
+				return true, "Vaziani"
+			elseif (x == -304472) or (x == -326635) or (x == -310013) or (x == -321094) then
+				return true, "Lochini"
+			elseif (x == -305724) or (x == -329942) or (x == -311778) or (x == -325480) then
+				return true, "Soganlug"
+			end
+		end
+		return false, nil
 	end,
 }
 

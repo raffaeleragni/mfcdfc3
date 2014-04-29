@@ -33,6 +33,7 @@ public class MFCDCanvas extends JPanel implements Observer
     private static final Color COLOR_FORE = Color.GREEN;
     private static final Color COLOR_BACK = Color.BLACK;
     private static final Color COLOR_WP_SELECTED = Color.WHITE;
+    private static final Color COLOR_MK = Color.YELLOW;
     private static final Color COLOR_RUNWAY = Color.WHITE;
     
     private static final int OSB01_X = 90;
@@ -364,6 +365,47 @@ public class MFCDCanvas extends JPanel implements Observer
                     g.setFont(fontOSB);
                 }
             });
+            // THEN MARKPOINTS SQUARES
+            List<double[]> mks = status.getMarkpoints();
+            for (int i = 0; i < mks.size(); i++)
+            { 
+                double[] v = mks.get(i);
+                double deltaBearing = status.getBearingDelta(status.getBearingToPoint(v[0], v[1]));
+                deltaBearing += 90;
+                double distance = status.getDistanceToPoint(v[0], v[1]);
+                boolean outside = distance > mapRadius;
+                double distancePX = distance * mapRadiusPX / mapRadius;
+                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
+                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
+                if (!(outside))
+                {
+                    String s = "M"+String.valueOf(i+1);
+                    
+                    g.setFont(fontWP);
+                    Rectangle2D rect = g.getFontMetrics().getStringBounds(s, g);
+                    int maxD = (int) (rect.getWidth() > rect.getHeight() ? rect.getWidth() : rect.getHeight());
+                    g.setColor(COLOR_MK);
+                    g.fillRect(
+                        (int) (endx - maxD/2 - scale(3)),
+                        (int) (endy - maxD/2 - scale(3)),
+                        (int) (maxD + scale(6)),
+                        (int) (maxD + scale(6))
+                    );
+                    g.setColor(COLOR_BACK);
+                    g.fillRect(
+                        (int) (endx - maxD/2 - scale(3)) + 1,
+                        (int) (endy - maxD/2 - scale(3)) + 1,
+                        (int) (maxD + scale(6)) - 2,
+                        (int) (maxD + scale(6)) - 2
+                    );
+                    g.setColor(COLOR_MK);
+                    g.drawString(s,
+                        (int) (endx - rect.getWidth()/2),
+                        (int) (endy + rect.getHeight()/4)
+                    );
+                    g.setFont(fontOSB);
+                }
+            }
         }
         
         g.setColor(COLOR_FORE);
@@ -446,12 +488,21 @@ public class MFCDCanvas extends JPanel implements Observer
             s = String.valueOf(status.getSimData().getCurWaypointNum()-1);
         if (status.getSimData().getCurWaypointNum() == -1)
             s = "N/A";
-        Utils.writeAtOSB(g, bounds, 20, "  CUR: " + s, false, status.getOsbDown());
-        Utils.writeAtOSB(g, bounds, 19, "  WP: " + status.getWPBRAStr(), false, status.getOsbDown());
-        Utils.writeAtOSB(g, bounds, 18, "  LAT: " + status.getLLfromDeg(status.getSimData().getCurWaypointY(), true), false, status.getOsbDown());
-        Utils.writeAtOSB(g, bounds, 17, "  LON: " + status.getLLfromDeg(status.getSimData().getCurWaypointX(), false), false, status.getOsbDown());
-        
+        Utils.writeAtOSB(g, bounds, 20, "  CUR WP: " + s, false, status.getOsbDown());
+        if (!status.getSimData().getLandingName().isEmpty())
+        {
+            Utils.writeAtOSB(g, bounds, 19, "  LAND: " + status.getSimData().getLandingName(), false, status.getOsbDown());
+        }
+        else if (status.getSimData().getCurWaypointNum() != -1)
+        {
+            Utils.writeAtOSB(g, bounds, 19, "  WP TO: " + status.getWPBRAStr(), false, status.getOsbDown());
+            Utils.writeAtOSB(g, bounds, 18, "  LAT: " + status.getLLfromDeg(status.getSimData().getCurWaypointY(), true), false, status.getOsbDown());
+            Utils.writeAtOSB(g, bounds, 17, "  LON: " + status.getLLfromDeg(status.getSimData().getCurWaypointX(), false), false, status.getOsbDown());
+            Utils.writeAtOSB(g, bounds, 16, "  ALT: " + status.getSimData().getCurWaypointHStr(), false, status.getOsbDown());
+        }
         Utils.writeAtOSB(g, bounds, 6, "SET BE HERE "+CHAR_ARROW_LEFT+" ", false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 7, "BE OFFSET "+CHAR_ARROW_LEFT+" ", false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 8, "WP OFFSET "+CHAR_ARROW_LEFT+" ", false, status.getOsbDown());
     }
 
     public void drawPage_POS(Graphics g, Rectangle bounds)
@@ -469,6 +520,7 @@ public class MFCDCanvas extends JPanel implements Observer
         Utils.writeAtOSB(g, bounds, 10, "Pitch: " + status.getSimData().getPitchStr() + "  ", false, status.getOsbDown());
         msg = status.getBeBRAStr();
         Utils.writeAtOSB(g, bounds, 6, "BE: "+msg+" "+CHAR_ARROW_LEFT, false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 7, "MK HERE "+CHAR_ARROW_LEFT, false, status.getOsbDown());
     }
     
     public void drawPage_ENG(Graphics g, Rectangle bounds)
@@ -497,6 +549,7 @@ public class MFCDCanvas extends JPanel implements Observer
         else
             Utils.writeAtOSB(g, bounds, 9, "BE STRAIGHT "+CHAR_ARROWS_VERTICAL, false, status.getOsbDown());
         Utils.writeAtOSB(g, bounds, 8, "CHANGE BE "+CHAR_ARROW_LEFT, false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 20, CHAR_ARROW_RIGHT+" RESET NAV", false, status.getOsbDown());
     }
 
     public void drawPageSelectionMenu(Graphics g, Rectangle bounds)
