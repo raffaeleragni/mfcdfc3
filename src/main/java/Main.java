@@ -1036,6 +1036,9 @@ public final class Main extends JFrame
         Path dir2 = Paths.get(home, "Saved Games", "DCS.openbeta", "Scripts");
         Arrays.asList(dir1, dir2).stream().forEach((p)->
         {
+            if (!p.toFile().exists())
+                return;
+            
             File sockfile = new File(p.toFile(), "MFCD_FC3.lua");
             File exportfile = new File(p.toFile(), "Export.lua");
             boolean foundline = false;
@@ -1043,6 +1046,9 @@ public final class Main extends JFrame
             int ct = 0;
             try
             {
+                if (!exportfile.exists())
+                    exportfile.createNewFile();
+                
                 try (InputStream is = Main.class.getResourceAsStream("SOCK.lua");
                     OutputStream os = new FileOutputStream(sockfile))
                 {
