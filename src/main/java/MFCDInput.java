@@ -176,7 +176,8 @@ public class MFCDInput
         switch (osbnum)
         {
             case 6: // SET BE HERE
-                status.setBe(status.getSimData().getCurWaypointX(), status.getSimData().getCurWaypointY());
+                if (status.getSimData().getCurWaypointNum() != -1)
+                    status.setBe(status.getSimData().getCurWaypointX(), status.getSimData().getCurWaypointY());
                 break;
             case 7: // BE OFFSET
                 Main.main.offsetFrom(status.getBeX(), status.getBeY());
