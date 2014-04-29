@@ -102,8 +102,8 @@ public class MFCDSocket
                                     status.setConnected(false);
                                     break;
                                 case MSG_LAND:
-                                    if (pars.length > 1)
-                                        status.getSimData().landingAt(pars[1]);
+                                    if (pars.length > 3)
+                                        status.getSimData().landingAt(pars[1], Double.parseDouble(pars[2]), Double.parseDouble(pars[3]));
                                     break;
                             }
                         }

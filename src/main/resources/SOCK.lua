@@ -71,12 +71,14 @@ SOCK = {
 					self:broadcast(self.CODES.RPM..":"..engData.RPM.left..":"..engData.RPM.right)
 					self:broadcast(self.CODES.ENG_TEMP..":"..engData.Temperature.left..":"..engData.Temperature.right)
 				end
-				if landing then
-					self:broadcast(self.CODES.LAND..":"..name)
-				elseif wpData then
+				if wpData then
 					local wpNum = wpData.goto_point.this_point_num
 					local coords = LoLoCoordinatesToGeoCoordinates(wpData.goto_point.world_point.x, wpData.goto_point.world_point.z)
-					self:broadcast(self.CODES.WAYPOINT..":"..wpNum..":"..coords.longitude..":"..coords.latitude..":"..wpData.goto_point.world_point.y)
+					if landing then
+						self:broadcast(self.CODES.LAND..":"..name..":"..coords.longitude..":"..coords.latitude)
+					else
+						self:broadcast(self.CODES.WAYPOINT..":"..wpNum..":"..coords.longitude..":"..coords.latitude..":"..wpData.goto_point.world_point.y)
+					end
 				end
 			end
 			-- increment and reset to cycle when out of maximum

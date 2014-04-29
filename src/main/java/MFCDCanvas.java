@@ -459,6 +459,54 @@ public class MFCDCanvas extends JPanel implements Observer
             }
         }
         
+        // DRAW LANDING LINE IF PRESENT A LANDING MODE
+        if (!status.getSimData().getLandingName().isEmpty())
+        {
+            double x = status.getSimData().getLandingX();
+            double y = status.getSimData().getLandingY();
+            double deltaBearing = status.getBearingToPoint(x, y);
+            deltaBearing = status.getSimData().getHeading() - deltaBearing;
+            deltaBearing += 90; // sin/cos circle starts from RIGHT
+            double distance = status.getDistanceToPoint(x, y);
+            boolean outside = distance > mapRadius;
+            g.setColor(COLOR_RUNWAY);
+            if (outside)
+            {
+                Graphics2D g2 = (Graphics2D) g;
+                Stroke oldStroke = g2.getStroke();
+                g2.setStroke(dashed);
+                g2.drawLine(
+                    (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(5)),
+                    (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(5)),
+                    (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * mapRadiusPX),
+                    (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * mapRadiusPX));
+                g2.setStroke(oldStroke);
+            }
+            else
+            {
+                double distancePX = distance * mapRadiusPX / mapRadius;
+                Graphics2D g2 = (Graphics2D) g;
+                Stroke oldStroke = g2.getStroke();
+                g2.setStroke(dashed);
+                int starttx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(5));
+                int starty = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(5));
+                int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
+                int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
+                g2.drawLine(starttx, starty, endx, endy);
+                g2.setStroke(oldStroke);
+                
+                g.fillArc(
+                    (int) (endx - scale(4)),
+                    (int) (endy - scale(4)),
+                    (int) (scale(8)),
+                    (int) (scale(8)),
+                    0,
+                    360
+                );
+            }
+            g.setColor(COLOR_FORE);
+        }
+        
         g.setColor(COLOR_FORE);
         // AIRCRAFT POSITION (center) BY A TRIANGLE
         double triangleSize = 5;

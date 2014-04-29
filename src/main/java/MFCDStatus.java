@@ -264,6 +264,8 @@ public class MFCDStatus extends Observable
         }
         
         String landingName = "";
+        double landingX = 0;
+        double landingY = 0;
         int curWaypointNum = -1;
         double curWaypointX = 0;
         double curWaypointY = 0;
@@ -277,15 +279,27 @@ public class MFCDStatus extends Observable
             curWaypointH = h;
             waypoints.put(num, new double[]{x, y, h});
             landingName = "";
+            landingX = 0;
+            landingY = 0;
             MFCDStatus.this.triggerUpdate();
         }
         public String getLandingName()
         {
             return landingName;
         }
-        public void landingAt(String s)
+        public double getLandingX()
+        {
+            return landingX;
+        }
+        public double getLandingY()
+        {
+            return landingY;
+        }
+        public void landingAt(String s, double x, double y)
         {
             landingName = s;
+            landingX = x;
+            landingY = y;
             curWaypointNum = -1;
             MFCDStatus.this.triggerUpdate();
         }
@@ -311,7 +325,6 @@ public class MFCDStatus extends Observable
                 return new BigDecimal(ftFromMeters(curWaypointH)).setScale(0, BigDecimal.ROUND_HALF_UP).toString() + "ft";
             return new BigDecimal(curWaypointH).setScale(0, BigDecimal.ROUND_HALF_UP).toString() + "m";
         }
-        
         public Map<Integer, double[]> getWaypoints()
         {
             return waypoints;
