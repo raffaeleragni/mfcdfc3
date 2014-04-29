@@ -264,7 +264,12 @@ public class MFCDCanvas extends JPanel implements Observer
                 
                 // NO NEED TO DRAW
                 if (prevOutside && endsOutside)
+                {
+                    prevx = endx;
+                    prevy = endy;
+                    prevOutside = endsOutside;
                     continue;
+                }
 
                 // DRAW THE CONNECTING LINE FIRST
                 // So that the square goes over it.

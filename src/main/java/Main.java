@@ -18,13 +18,15 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 
 /**
  *
  * @author Raffaele Ragni <raffaele.ragni@gmail.com>
  */
-public class Main extends JFrame
+public final class Main extends JFrame
 {
     static
     {
@@ -42,8 +44,8 @@ public class Main extends JFrame
     final SetBEForm setBEForm;
     final SetUseMFD setMFDForm;
     boolean collapsed = false;
-    boolean toresize = true;
-    
+    int borderFactor = 60;
+    private List<JButton> OSBs;
     private Point initialClickMove;
     
     public Main()
@@ -58,6 +60,9 @@ public class Main extends JFrame
         drawPanel.add(canvas);
         canvas.revalidate();
         canvas.repaint();
+    
+        OSBs = Arrays.asList( OSB1, OSB10, OSB11, OSB12, OSB13, OSB14, OSB15, OSB16, OSB17, OSB18,
+            OSB19, OSB2, OSB20, OSB3, OSB4, OSB5, OSB6, OSB7, OSB8, OSB9);
         
         KeyboardFocusManager
             .getCurrentKeyboardFocusManager()
@@ -116,13 +121,12 @@ public class Main extends JFrame
     
     public void toggleButtons()
     {
-        toresize = false;
         if (collapsed)
         {
             Point prevLoc = getLocation();
-            setSize(getWidth() + 120, getHeight() + 120);
-            drawPanel.setLocation(60, 60);
-            setLocation(prevLoc.x-60, prevLoc.y-60);
+            setSize(getWidth() + borderFactor*2, getHeight() + borderFactor*2);
+            drawPanel.setLocation(borderFactor, borderFactor);
+            setLocation(prevLoc.x-borderFactor, prevLoc.y-borderFactor);
         }
         else
         {
@@ -131,8 +135,36 @@ public class Main extends JFrame
             setLocation(prevLoc.x+drawPanel.getX(), prevLoc.y+drawPanel.getY());
             drawPanel.setLocation(0, 0);
         }
-        toresize = true;
         collapsed = !collapsed;
+    }
+    
+    public void resize(int newSize)
+    {
+        Dimension currentSize = drawPanel.getSize();
+        Point location = drawPanel.getLocation();
+        
+        final double factor = (double) newSize / (double) currentSize.width;
+        borderFactor *= factor;
+        
+        location.x *= factor;
+        location.y *= factor;
+        drawPanel.setLocation(location);
+        drawPanel.setSize(newSize, newSize);
+        Dimension mainSize = getSize();
+        mainSize.width *= factor;
+        mainSize.height *= factor;
+        setSize(mainSize);
+        OSBs.stream().forEach((osb)->
+        {
+            Point p = osb.getLocation();
+            Dimension d = osb.getSize();
+            p.x *= factor;
+            p.y *= factor;
+            d.width *= factor;
+            d.height *= factor;
+            osb.setLocation(p);
+            osb.setSize(d);
+        });
     }
     
     public void quit()
@@ -971,7 +1003,7 @@ public class Main extends JFrame
         java.awt.EventQueue.invokeLater(() ->
         {
             if (_size != null)
-                main.drawPanel.setSize(_size, _size);
+                main.resize(_size);
             if (_hideButtons)
                 main.toggleButtons();
             if (_position != null)
@@ -1019,7 +1051,6 @@ public class Main extends JFrame
             catch (IOException e) {}
         });
     }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton OSB1;
     private javax.swing.JButton OSB10;
