@@ -44,6 +44,7 @@ public final class Main extends JFrame
     final SetBEForm setBEForm;
     final SetUseMFD setMFDForm;
     final OffsetForm offsetForm;
+    final SetMKForm setMKForm;
     boolean collapsed = false;
     int borderFactor = 60;
     private List<JButton> OSBs;
@@ -59,6 +60,7 @@ public final class Main extends JFrame
         canvas = new MFCDCanvas(status);
         input = new MFCDInput(status);
         socket = new MFCDSocket(status);
+        setMKForm = new SetMKForm();
         drawPanel.add(canvas);
         canvas.revalidate();
         canvas.repaint();
@@ -193,6 +195,17 @@ public final class Main extends JFrame
         Dimension fd = setBEForm.getSize();
         setBEForm.setLocation(p.x + d.width/2 - fd.width/2, p.y + d.height/2 - fd.height/2);
         setBEForm.setVisible(true);
+        setBEForm.clear();
+    }
+    
+    public void newMK()
+    {
+        Dimension d = getSize();
+        Point p = getLocation();
+        Dimension fd = setMKForm.getSize();
+        setMKForm.setLocation(p.x + d.width/2 - fd.width/2, p.y + d.height/2 - fd.height/2);
+        setMKForm.setVisible(true);
+        setMKForm.clear();
     }
     
     public void changeMFD()

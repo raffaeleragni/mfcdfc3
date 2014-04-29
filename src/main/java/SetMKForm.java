@@ -3,7 +3,6 @@ import com.sun.glass.events.KeyEvent;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.DefaultFormatter;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 
@@ -11,10 +10,10 @@ import javax.swing.text.MaskFormatter;
  *
  * @author Raffaele Ragni <raffaele.ragni@gmail.com>
  */
-public class SetBEForm extends javax.swing.JFrame
+public class SetMKForm extends javax.swing.JFrame
 {
     /** Creates new form SetBEForm */
-    public SetBEForm()
+    public SetMKForm()
     {
         initComponents();
     }
@@ -156,7 +155,7 @@ public class SetBEForm extends javax.swing.JFrame
         BE_Long.setText("");
         BE_Lat.requestFocus();
     }
-    
+
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnCancelActionPerformed
     {//GEN-HEADEREND:event_btnCancelActionPerformed
         setVisible(false);
@@ -175,7 +174,7 @@ public class SetBEForm extends javax.swing.JFrame
             {
                 double beX = Double.parseDouble(ssLong[0]) + (Double.parseDouble(ssLong[1]) / 60);
                 double beY = Double.parseDouble(ssLat[0]) + (Double.parseDouble(ssLat[1]) / 60);
-                Main.main.status.setBe(beX, beY);
+                Main.main.status.addMark(beX, beY);
             }
             catch (Exception e){}
         }
@@ -185,7 +184,7 @@ public class SetBEForm extends javax.swing.JFrame
             {
                 double beX = Double.parseDouble(ssLong[0]) + ((Double.parseDouble(ssLong[1]) + (Double.parseDouble(ssLong[2]) / 60)) / 60);
                 double beY = Double.parseDouble(ssLat[0]) + ((Double.parseDouble(ssLat[1]) + (Double.parseDouble(ssLat[2]) / 60)) / 60);
-                Main.main.status.setBe(beX, beY);
+                Main.main.status.addMark(beX, beY);
             }
             catch (Exception e){}
         }

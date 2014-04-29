@@ -503,6 +503,7 @@ public class MFCDCanvas extends JPanel implements Observer
         Utils.writeAtOSB(g, bounds, 6, "SET BE HERE "+CHAR_ARROW_LEFT+" ", false, status.getOsbDown());
         Utils.writeAtOSB(g, bounds, 7, "BE OFFSET "+CHAR_ARROW_LEFT+" ", false, status.getOsbDown());
         Utils.writeAtOSB(g, bounds, 8, "WP OFFSET "+CHAR_ARROW_LEFT+" ", false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 9, "NEW MK L/L "+CHAR_ARROW_LEFT+" ", false, status.getOsbDown());
     }
 
     public void drawPage_POS(Graphics g, Rectangle bounds)

@@ -170,7 +170,6 @@ public class MFCDInput
         // DO nothing or TEST something
     }
     
-    
     public void delegatePageOSBClock_WPT(int osbnum)
     {
         switch (osbnum)
@@ -186,12 +185,14 @@ public class MFCDInput
                 if (status.getSimData().getCurWaypointNum() != -1)
                     Main.main.offsetFrom(status.getSimData().getCurWaypointX(), status.getSimData().getCurWaypointY());
                 break;
+            case 9: // MK L/L
+                Main.main.newMK();
+                break;
         }
     }
     
     public void delegatePageOSBClock_NAV(int osbnum)
     {
-        
         switch (osbnum)
         {
             case 20: // Range decrease
