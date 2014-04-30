@@ -370,6 +370,7 @@ public class MFCDStatus extends Observable
     public void reset()
     {
         getSimData().curWaypointNum = -1;
+        getSimData().landingName = "";
     }
 
     public boolean isConnected()
