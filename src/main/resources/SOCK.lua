@@ -185,6 +185,7 @@ SOCK = {
 			elseif (x == -305724) or (x == -329942) or (x == -311778) or (x == -325480) then
 				return true, "Soganlug"
 			end
+			return true, "<LAND>"
 		end
 		return false, nil
 	end,
@@ -246,6 +247,9 @@ function table.key_to_str ( k )
 end
 
 function table.tostring( tbl )
+  if "table" ~= type(tbl) then
+    return
+  end
   local result, done = {}, {}
   for k, v in ipairs( tbl ) do
     table.insert( result, table.val_to_str( v ) )
@@ -260,9 +264,12 @@ function table.tostring( tbl )
   return "{" .. table.concat( result, "," ) .. "}"
 end
 
-local f = io.open(lfs.writedir()..'Scripts/SOCKdump.txt', "w")
-if f then
-	f:write(table.tostring(wpData))
-	f:close()
+function table.print(t)
+	local f = io.open(lfs.writedir()..'Scripts/dump.txt', "w")
+	if f then
+		f:write(table.tostring(t))
+		f:close()
+	end
 end
+
 ]]--
