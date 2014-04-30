@@ -316,6 +316,43 @@ public class MFCDCanvas extends JPanel implements Observer
                 prevy = endy;
                 prevOutside = endsOutside;
             }
+            // THEN THE LINE OF THE SELECTED WAYPOINT
+            if (status.getSimData().getCurWaypointNum() != -1)
+            {
+                double x = status.getSimData().getCurWaypointX();
+                double y = status.getSimData().getCurWaypointY();
+                double deltaBearing = status.getBearingDelta(status.getBearingToPoint(x, y));
+                deltaBearing += 90; // sin/cos circle starts from RIGHT
+                double distance = status.getDistanceToPoint(x, y);
+                boolean outside = distance > mapRadius;
+                g.setColor(COLOR_WP_SELECTED);
+                if (outside)
+                {
+                    Graphics2D g2 = (Graphics2D) g;
+                    Stroke oldStroke = g2.getStroke();
+                    g2.setStroke(dashed);
+                    g2.drawLine(
+                        (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(5)),
+                        (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(5)),
+                        (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * mapRadiusPX),
+                        (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * mapRadiusPX));
+                    g2.setStroke(oldStroke);
+                }
+                else
+                {
+                    double distancePX = distance * mapRadiusPX / mapRadius;
+                    Graphics2D g2 = (Graphics2D) g;
+                    Stroke oldStroke = g2.getStroke();
+                    g2.setStroke(dashed);
+                    int starttx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * scale(5));
+                    int starty = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * scale(5));
+                    int endx = (int)(centerx + Math.cos(Math.toRadians(deltaBearing)) * distancePX);
+                    int endy = (int)(centery - Math.sin(Math.toRadians(deltaBearing)) * distancePX);
+                    g2.drawLine(starttx, starty, endx, endy);
+                    g2.setStroke(oldStroke);
+                }
+                g.setColor(COLOR_FORE);
+            }
             // THEN DRAW ALL SQUARES
             wps.entrySet().stream().forEach((e) ->
             { 
@@ -462,14 +499,18 @@ public class MFCDCanvas extends JPanel implements Observer
         // DRAW LANDING LINE IF PRESENT A LANDING MODE
         if (!status.getSimData().getLandingName().isEmpty())
         {
+            g.setColor(COLOR_RUNWAY);
+            String landingName = status.getSimData().getLandingName();
+            b = g.getFontMetrics().getStringBounds(landingName, g);
+            g.drawString(landingName,
+                (int) (bounds.x + bounds.width/2 - b.getWidth()/2),
+                (int) (bounds.y + b.getHeight() + scale(OSB_TEXT_MARGIN)));
             double x = status.getSimData().getLandingX();
             double y = status.getSimData().getLandingY();
-            double deltaBearing = status.getBearingToPoint(x, y);
-            deltaBearing = status.getSimData().getHeading() - deltaBearing;
+            double deltaBearing = status.getBearingDelta(status.getBearingToPoint(x, y));
             deltaBearing += 90; // sin/cos circle starts from RIGHT
             double distance = status.getDistanceToPoint(x, y);
             boolean outside = distance > mapRadius;
-            g.setColor(COLOR_RUNWAY);
             if (outside)
             {
                 Graphics2D g2 = (Graphics2D) g;
