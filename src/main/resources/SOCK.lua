@@ -140,6 +140,9 @@ SOCK = {
 	checklanding = function(self)
 		local navInfo = LoGetNavigationInfo()
 		local navRoute = LoGetRoute()
+		if navInfo == nil or navRoute == nil then
+			return false, nil
+		end
 		local x = math.floor(navRoute.goto_point.world_point.x)
 		if navInfo.SystemMode.submode == "LANDING" or navInfo.SystemMode.submode == "ARRIVAL" then
 			if (x == -18893) or (x == 8070) or (x == 1329) or (x == -12152) then
