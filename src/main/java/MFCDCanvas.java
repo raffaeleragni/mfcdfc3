@@ -6,8 +6,12 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,13 +32,15 @@ public class MFCDCanvas extends JPanel implements Observer
     private static final int OSB_TEXT_MARGIN = 15;
     private static final int OSB_TEXT_BORDER = 5;
     private static final int NAV_MAP_BORDER = 50;
+    private static final int ADI_BORDER = 100;
     private static final float DASH_SIZE = 5f;
     private static final Color COLOR_WARNBOX = Color.YELLOW;
-    private static final Color COLOR_FORE = Color.GREEN;
     private static final Color COLOR_BACK = Color.BLACK;
     private static final Color COLOR_WP_SELECTED = Color.WHITE;
     private static final Color COLOR_MK = Color.YELLOW;
     private static final Color COLOR_RUNWAY = Color.WHITE;
+    // This can change
+    private static Color COLOR_FORE = Color.GREEN;
     
     private static final int OSB01_X = 90;
     private static final int OSB02_X = 170;
@@ -93,8 +99,14 @@ public class MFCDCanvas extends JPanel implements Observer
         pageMaps.put(MFCDStatus.Page.STG, this::drawPage_STG);
         pageMaps.put(MFCDStatus.Page.ENG, this::drawPage_ENG);
         pageMaps.put(MFCDStatus.Page.WPT, this::drawPage_WPT);
+        pageMaps.put(MFCDStatus.Page.ADI, this::drawPage_ADI);
     }
 
+    public void setForeColor(Color c)
+    {
+        COLOR_FORE = c;
+    }
+    
     @Override
     public void setSize(Dimension d)
     {
@@ -130,6 +142,9 @@ public class MFCDCanvas extends JPanel implements Observer
         Graphics g = _g;
         try
         {
+            // Try using anti aliasing
+            ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
             // Clear out the screen
             g.setFont(fontOSB);
             g.setColor(Color.BLACK);
@@ -152,6 +167,105 @@ public class MFCDCanvas extends JPanel implements Observer
         }
     }
     
+    public void drawPage_ADI(Graphics g, Rectangle bounds)
+    {        
+        // SET DEFAULT COLOR
+        g.setColor(COLOR_FORE);
+        
+        // CENTER OF THE SCREEN
+        int centerx = (int) (bounds.getX() + bounds.getWidth()/2);
+        int centery = (int) (bounds.getY() + bounds.getHeight()/2);
+        
+        // BIG CIRCLE MEASUREMENTS
+        int circleX = (int) (bounds.getX() + scale(ADI_BORDER));
+        int circleY = (int) (bounds.getY() + scale(ADI_BORDER));
+        int circleW = (int) (bounds.getWidth() - scale(ADI_BORDER*2));
+        int circleH = (int) (bounds.getHeight() - scale(ADI_BORDER*2));
+        g.drawArc(circleX, circleY, circleW, circleH, 0, 360);
+        // radius is already scaled
+        int radius = circleW/2;
+        
+        {
+            int[] angles = new int[]{0, 10, 20, 30, 45, 60 ,90};
+            boolean[] bigLines = new boolean[]{true, false, false, true, false, true, true};
+
+            for (int i = 0; i < angles.length && i < bigLines.length; i++)
+            {
+                double x = Math.cos(Math.toRadians(270+angles[i]));
+                double y = Math.sin(Math.toRadians(270+angles[i]));
+                int _x1 = (int)(x * (double)radius)+centerx;
+                int _y1 = centery+(int)(y * (double)radius);
+                int _x2 = (int)(x * (double)(radius+scale(bigLines[i] ? 20 : 10)))+centerx;
+                int _y2 = centery+(int)(y * (double)(radius+scale(bigLines[i] ? 20 : 10)));
+                g.drawLine(_x1, _y1, _x2, _y2);
+                x = Math.cos(Math.toRadians(270-angles[i]));
+                y = Math.sin(Math.toRadians(270-angles[i]));
+                _x1 = (int)(x * (double)radius)+centerx;
+                _y1 = centery+(int)(y * (double)radius);
+                _x2 = (int)(x * (double)(radius+scale(bigLines[i] ? 20 : 10)))+centerx;
+                _y2 = centery+(int)(y * (double)(radius+scale(bigLines[i] ? 20 : 10)));
+                g.drawLine(_x1, _y1, _x2, _y2);
+            }
+        }
+        {
+            int pitch = status.getSimData().getPitch();
+            int bank = status.getSimData().getBank();
+            
+            Ellipse2D.Float clip = new Ellipse2D.Float(circleX, circleY, circleW, circleH);
+            ((Graphics2D)g).setClip(clip);
+
+            BufferedImage img = new BufferedImage((int)bounds.getWidth(), (int)bounds.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+            Graphics2D g2d = (Graphics2D) img.getGraphics();
+
+            g2d.setColor(COLOR_FORE);
+            int topPoint = centery-circleH/2;
+            g2d.drawPolygon(new int[] {centerx, (int)(centerx+scale(6)), (int)(centerx-scale(6))},
+                new int []{topPoint, (int)(topPoint + scale(10)), (int)(topPoint + scale(10))}, 3);
+            
+            AffineTransform at = new AffineTransform();
+            at.translate(centerx, centery);
+            at.rotate(Math.toRadians(bank));
+            at.translate(-centerx, -centery);
+            ((Graphics2D)g).drawImage(img, at, null);
+            
+            double lineStretch = 4;
+            
+            img = new BufferedImage((int)bounds.getWidth(), (int)bounds.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+            g2d = (Graphics2D) img.getGraphics();
+            g2d.setColor(COLOR_FORE);
+            
+            int[] angles = new int[]{5, 10, 15, 20, 25 , 30, 40, 50, 60, 70, 80, 90};
+            boolean[] bigLines = new boolean[]{false, true, false, true, false, true, true, true, true, true, true, true};
+            g2d.drawLine((int) (centerx - scale(100)),
+                (int) (centery + scale(pitch*lineStretch)),
+                (int) (centerx + scale(100)),
+                (int) (centery + scale(pitch*lineStretch)));
+            for (int i = 0; i < angles.length && i < bigLines.length; i++)
+            {
+                g2d.drawLine((int) (centerx - scale(bigLines[i] ? 40 : 5)),
+                    (int) (centery + scale(pitch*lineStretch) - scale(angles[i]*lineStretch)),
+                    (int) (centerx + scale(bigLines[i] ? 40 : 5)),
+                    (int) (centery + scale(pitch*lineStretch) - scale(angles[i]*lineStretch)));
+                g2d.drawLine((int) (centerx - scale(bigLines[i] ? 40 : 5)),
+                    (int) (centery + scale(pitch*lineStretch) + scale(angles[i]*lineStretch)),
+                    (int) (centerx + scale(bigLines[i] ? 40 : 5)),
+                    (int) (centery + scale(pitch*lineStretch) + scale(angles[i]*lineStretch)));
+            }
+            
+            at = new AffineTransform();
+            at.translate(centerx, centery);
+            at.rotate(Math.toRadians(-bank));
+            at.translate(-centerx, -centery);
+            ((Graphics2D)g).drawImage(img, at, this);
+            
+            ((Graphics2D)g).setClip(null);
+        }
+
+        ((Graphics2D)g).setStroke(new BasicStroke(3));
+        ((Graphics2D)g).drawLine((int) (centerx - scale(15)), centery, (int) (centerx - scale(75)), centery);
+        ((Graphics2D)g).drawLine((int) (centerx + scale(15)), centery, (int) (centerx + scale(75)), centery);
+        ((Graphics2D)g).drawOval(centerx, centery, 1, 1);
+    }
 
     public void drawPage_TEST(Graphics g, Rectangle bounds)
     {
@@ -164,7 +278,7 @@ public class MFCDCanvas extends JPanel implements Observer
         Rectangle2D b;
         
         // SET DEFAULT COLOR
-        g.setColor(Color.GREEN);
+        g.setColor(COLOR_FORE);
         
         // CENTER OF THE SCREEN
         int centerx = (int) (bounds.getX() + bounds.getWidth()/2);
@@ -991,7 +1105,7 @@ public class MFCDCanvas extends JPanel implements Observer
             if (value >= 100f)
                 g.setColor(Color.RED);
             else
-                g.setColor(Color.GREEN);
+                g.setColor(COLOR_FORE);
             g.fillArc(
                 (int) (x - bounds.width/8),
                 (int) (y - bounds.height/8),

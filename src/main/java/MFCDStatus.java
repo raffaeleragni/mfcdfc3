@@ -1,4 +1,3 @@
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -13,16 +12,16 @@ import java.util.TreeMap;
  */
 public class MFCDStatus extends Observable
 {
-    // Only lower buttons can have paes, num = 5
+    // Only lower buttons can have pages, num = 5
     private static final int PAGE_SET_NUM = 5;
     public static final MFCDStatus.Page[] LOADPAGE_ITEMS = new MFCDStatus.Page[]
     {
         null, null, null, null, null,
-        Page.POS, Page.NAV, Page.WPT, null, null,
+        Page.POS, Page.NAV, Page.WPT, Page.ADI, null,
         null, null, Page.ENG, Page.STG, Page.TST,
     };
     
-    public static enum Page {TST, POS, NAV, STG, ENG, WPT}
+    public static enum Page {TST, POS, NAV, STG, ENG, WPT, ADI}
     public static enum MetricSystem {METRIC, IMPERIAL}
     
     public class SimData
@@ -365,6 +364,13 @@ public class MFCDStatus extends Observable
         selectedPage = 0;
         
         pageNAVRadiusDecrease();
+    }
+    
+    public void updatePageSet(List<Page> pages)
+    {
+        for (int i = 0; i < 5; i++)
+            pageSet[i] = pages.size() > i ? pages.get(i) : null;
+        triggerUpdate();
     }
     
     public void reset()

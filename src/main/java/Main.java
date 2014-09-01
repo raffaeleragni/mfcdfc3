@@ -1,4 +1,4 @@
-
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
@@ -45,6 +46,8 @@ public final class Main extends JFrame
     final SetUseMFD setMFDForm;
     final OffsetForm offsetForm;
     final SetMKForm setMKForm;
+    List<MFCDStatus.Page> customPages = null;
+    boolean blueLines = false;
     boolean collapsed = false;
     int borderFactor = 60;
     private List<JButton> OSBs;
@@ -1021,6 +1024,21 @@ public final class Main extends JFrame
             
             if (arg.startsWith("-s"))
                 size = Integer.parseInt(arg.substring(2));
+            
+            if (arg.startsWith("-blue"))
+            {
+                main.canvas.setForeColor(Color.CYAN);
+            }
+            
+            if (arg.startsWith("-pages"))
+            {
+                String spages = arg.substring(6);
+                List<MFCDStatus.Page> customPages = Arrays.asList(spages.split(","))
+                        .stream()
+                        .map(s -> MFCDStatus.Page.valueOf(s))
+                        .collect(Collectors.toList());
+                main.status.updatePageSet(customPages);
+            }
         }
         
         final boolean _hideButtons = hideButtons;
