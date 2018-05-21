@@ -996,7 +996,6 @@ public final class Main extends JFrame
             java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        checkLUA();
         main = new Main();
     }
     
@@ -1067,11 +1066,13 @@ public final class Main extends JFrame
         Path dir2 = Paths.get(home, "Saved Games", "DCS.openbeta", "Scripts");
         Arrays.asList(dir1, dir2).stream().forEach((p)->
         {
-            if (!p.toFile().exists())
-                return;
-            
             File sockfile = new File(p.toFile(), "MFCD_FC3.lua");
             File exportfile = new File(p.toFile(), "Export.lua");
+            
+            if (sockfile.exists()) {
+                return;
+            }
+            
             boolean foundline = false;
             byte[] buf = new byte[10240];
             int ct = 0;

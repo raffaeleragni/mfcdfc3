@@ -44,6 +44,10 @@ public class MFCDSocket
     {
         while (socket != null && !socket.isClosed())
         {
+            try {
+                Thread.sleep(40);
+            } catch (InterruptedException ex) {
+            }
             try
             {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));

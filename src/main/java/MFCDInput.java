@@ -263,6 +263,7 @@ public class MFCDInput
         {
             while(joystick != null)
             {
+                Thread.sleep(100);
                 joystick.poll();
                 EventQueue queue = joystick.getEventQueue();
                 Event event = new Event();
@@ -278,7 +279,7 @@ public class MFCDInput
                             osbUp(num);
                     }
                     catch (NumberFormatException | NullPointerException e){}
-                    Thread.sleep(1);
+                    Thread.sleep(100);
                 }
             }
         }

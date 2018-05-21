@@ -7,7 +7,7 @@ SOCK = {
 	-- CONST
 	DEGRAD = 180 / math.pi,
 	PORT = 20000,
-	FRAME_DELAY = 0.05, -- seconds
+	FRAME_DELAY = 0.04, -- seconds
 	CODES = {
 		ALT = "ALT",
 		POSITION_LL = "PLL",
