@@ -36,6 +36,7 @@ public final class Main extends JFrame
         System.setProperty("sun.java2d.ddforcevram", "true");
         System.setProperty("sun.java2d.noddraw", "false");
         System.setProperty("sun.java2d.accthreshold", "0");
+        checkLUA();
     }
     
     final MFCDStatus status;
