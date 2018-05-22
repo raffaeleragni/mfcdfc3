@@ -219,6 +219,12 @@ public class MFCDInput
             case 8:
                 Main.main.changeBE();
                 break;
+            case 6: // SAVE MARKPOINTS TO FILE
+                status.saveMarkpoints();
+                break;
+            case 7: // RESET ONLY MARKPOINTS
+                status.getMarkpoints().clear();
+                break;
             case 20: // RESET
                 status.getSimData().getWaypoints().clear();
                 status.getMarkpoints().clear();

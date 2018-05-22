@@ -754,6 +754,8 @@ public class MFCDCanvas extends JPanel implements Observer
             Utils.writeAtOSB(g, bounds, 9, "BE STRAIGHT "+CHAR_ARROWS_VERTICAL, false, status.getOsbDown());
         Utils.writeAtOSB(g, bounds, 8, "CHANGE BE "+CHAR_ARROW_LEFT, false, status.getOsbDown());
         Utils.writeAtOSB(g, bounds, 20, CHAR_ARROW_RIGHT+" RESET NAV", false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 6,  "SAVE MARKPOINTS "+CHAR_ARROW_LEFT, false, status.getOsbDown());
+        Utils.writeAtOSB(g, bounds, 7,  "CLEAR MARKPOINTS "+CHAR_ARROW_LEFT, false, status.getOsbDown());
     }
 
     public void drawPageSelectionMenu(Graphics g, Rectangle bounds)

@@ -1,10 +1,18 @@
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import static java.util.stream.Collectors.toList;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -12,6 +20,8 @@ import java.util.TreeMap;
  */
 public class MFCDStatus extends Observable
 {
+    private static final Path MARKPOINTS_PATH = Paths.get("markpoints.txt");
+    
     // Only lower buttons can have pages, num = 5
     private static final int PAGE_SET_NUM = 5;
     public static final MFCDStatus.Page[] LOADPAGE_ITEMS = new MFCDStatus.Page[]
@@ -364,6 +374,7 @@ public class MFCDStatus extends Observable
         selectedPage = 0;
         
         pageNAVRadiusDecrease();
+        loadMarkpoints();
     }
     
     public void updatePageSet(List<Page> pages)
@@ -431,6 +442,36 @@ public class MFCDStatus extends Observable
     {
         markpoints.add(new double[]{x, y});
         triggerUpdate();
+    }
+
+    public void loadMarkpoints()
+    {
+        try {
+            List<String> points = Files.readAllLines(MARKPOINTS_PATH);
+            markpoints = points.stream()
+                .map(s -> {
+                    String[] ss = s.split(",");
+                    System.out.println("reading: "+s);
+                    return new double[] {Double.valueOf(ss[0]), Double.valueOf(ss[1])};
+                })
+                .collect(toList());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    public void saveMarkpoints()
+    {
+        List<String> points = markpoints.stream()
+            .map(point -> String.valueOf(point[0]) + "," + String.valueOf(point[1]))
+            .collect(toList());
+        try {
+            Files.write(MARKPOINTS_PATH, points);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+            System.err.println(ex.getMessage());
+        }
     }
     
     public void addMarkFromOffset(double x, double y, double deg, double dis)
