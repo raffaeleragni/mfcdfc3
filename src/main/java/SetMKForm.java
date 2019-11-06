@@ -1,5 +1,5 @@
 
-import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyEvent;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -1,9 +1,8 @@
 
-import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyEvent;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.DefaultFormatter;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 
@@ -156,7 +155,7 @@ public class SetBEForm extends javax.swing.JFrame
         BE_Long.setText("");
         BE_Lat.requestFocus();
     }
-    
+
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnCancelActionPerformed
     {//GEN-HEADEREND:event_btnCancelActionPerformed
         setVisible(false);
